@@ -25,3 +25,7 @@ exports.getAllCategories = async () => {
     return await userrepo.getAllCategories();
 };
 
+exports.getAllHomeProducts = async () => {
+    return await userrepo.getAllHomeProducts();
+};
+

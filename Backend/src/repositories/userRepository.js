@@ -62,3 +62,23 @@ exports.getAllCategories = async () => {
         createdAt: category.createdAt
     }));
 };
+
+exports.getAllHomeProducts = async () => {
+    const db = await connectDb();
+
+    const products = await db.collection('Products')
+        .find({})
+        .sort({ createdAt: -1 })
+        .project({ _id: 1, name: 1, price: 1, image: 1, categoryId: 1, brandId: 1, createdAt: 1 })
+        .toArray();
+
+    return products.map((product) => ({
+        id: product._id.toString(),
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        categoryId: product.categoryId ? product.categoryId.toString() : null,
+        brandId: product.brandId ? product.brandId.toString() : null,
+        createdAt: product.createdAt
+    }));
+};

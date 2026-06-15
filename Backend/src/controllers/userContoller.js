@@ -44,3 +44,14 @@ exports.getAllCategories = async (req, res) => {
         });
     }
 };
+
+exports.getAllHomeProducts = async (req, res) => {
+    try {
+        const products = await userService.getAllHomeProducts();
+        res.json(products);
+    } catch (err) {
+        res.status(500).json({
+            message: err.message || 'Failed to fetch products'
+        });
+    }
+};

@@ -6,6 +6,7 @@ const userController = require('../controllers/userContoller');
 
 router.post('/login', userController.login);
 router.get('/categories', userController.getAllCategories);
+router.get('/Homeproducts', userController.getAllHomeProducts);
 router.get('/:id/dashboard', auth, userController.getDashboard);
 
 
