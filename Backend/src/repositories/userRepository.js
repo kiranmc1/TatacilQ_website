@@ -94,3 +94,163 @@ exports.getAllHomeProducts = async () => {
         createdAt: product.createdAt
     }));
 };
+
+exports.createProduct = async (productData) => {
+    const db = await connectDb();
+    const now = new Date();
+
+    const result = await db.collection('Products').insertOne({
+        ...productData,
+        createdAt: now,
+        updatedAt: now
+    });
+
+    const product = await db.collection('Products').findOne({ _id: result.insertedId });
+    return {
+        id: product._id.toString(),
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        description: product.description,
+        categoryId: product.categoryId ? product.categoryId.toString() : null,
+        brandId: product.brandId ? product.brandId.toString() : null,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt
+    };
+};
+
+exports.updateProduct = async (productId, updates) => {
+    const db = await connectDb();
+
+    const result = await db.collection('Products').findOneAndUpdate(
+        { _id: new ObjectId(productId) },
+        { $set: { ...updates, updatedAt: new Date() } },
+        { returnDocument: 'after' }
+    );
+
+    if (!result.value) {
+        throw new Error('Not Found');
+    }
+
+    const product = result.value;
+    return {
+        id: product._id.toString(),
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        description: product.description,
+        categoryId: product.categoryId ? product.categoryId.toString() : null,
+        brandId: product.brandId ? product.brandId.toString() : null,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt
+    };
+};
+
+exports.deleteProduct = async (productId) => {
+    const db = await connectDb();
+    const result = await db.collection('Products').deleteOne({ _id: new ObjectId(productId) });
+
+    if (result.deletedCount !== 1) {
+        throw new Error('Not Found');
+    }
+};
+
+exports.createCategory = async (categoryData) => {
+    const db = await connectDb();
+    const now = new Date();
+
+    const result = await db.collection('Categories').insertOne({
+        ...categoryData,
+        createdAt: now,
+        updatedAt: now
+    });
+
+    const category = await db.collection('Categories').findOne({ _id: result.insertedId });
+    return {
+        id: category._id.toString(),
+        name: category.name,
+        createdAt: category.createdAt,
+        updatedAt: category.updatedAt
+    };
+};
+
+exports.updateCategory = async (categoryId, updates) => {
+    const db = await connectDb();
+
+    const result = await db.collection('Categories').findOneAndUpdate(
+        { _id: new ObjectId(categoryId) },
+        { $set: { ...updates, updatedAt: new Date() } },
+        { returnDocument: 'after' }
+    );
+
+    if (!result.value) {
+        throw new Error('Not Found');
+    }
+
+    const category = result.value;
+    return {
+        id: category._id.toString(),
+        name: category.name,
+        createdAt: category.createdAt,
+        updatedAt: category.updatedAt
+    };
+};
+
+exports.deleteCategory = async (categoryId) => {
+    const db = await connectDb();
+    const result = await db.collection('Categories').deleteOne({ _id: new ObjectId(categoryId) });
+
+    if (result.deletedCount !== 1) {
+        throw new Error('Not Found');
+    }
+};
+
+exports.createBrand = async (brandData) => {
+    const db = await connectDb();
+    const now = new Date();
+
+    const result = await db.collection('Brands').insertOne({
+        ...brandData,
+        createdAt: now,
+        updatedAt: now
+    });
+
+    const brand = await db.collection('Brands').findOne({ _id: result.insertedId });
+    return {
+        id: brand._id.toString(),
+        name: brand.name,
+        createdAt: brand.createdAt,
+        updatedAt: brand.updatedAt
+    };
+};
+
+exports.updateBrand = async (brandId, updates) => {
+    const db = await connectDb();
+
+    const result = await db.collection('Brands').findOneAndUpdate(
+        { _id: new ObjectId(brandId) },
+        { $set: { ...updates, updatedAt: new Date() } },
+        { returnDocument: 'after' }
+    );
+
+    if (!result.value) {
+        throw new Error('Not Found');
+    }
+
+    const brand = result.value;
+    return {
+        id: brand._id.toString(),
+        name: brand.name,
+        createdAt: brand.createdAt,
+        updatedAt: brand.updatedAt
+    };
+};
+
+exports.deleteBrand = async (brandId) => {
+    const db = await connectDb();
+    const result = await db.collection('Brands').deleteOne({ _id: new ObjectId(brandId) });
+
+    if (result.deletedCount !== 1) {
+        throw new Error('Not Found');
+    }
+};

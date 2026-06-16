@@ -70,3 +70,99 @@ exports.getAllHomeProducts = async (req, res) => {
         });
     }
 };
+
+exports.createProduct = async (req, res) => {
+    try {
+        const { name, price, categoryId, brandId, image, description } = req.body;
+        if (!name || price == null || !categoryId || !brandId) {
+            return res.status(400).json({ message: 'name, price, categoryId, and brandId are required' });
+        }
+
+        const product = await userService.createProduct({ name, price, categoryId, brandId, image, description });
+        res.status(201).json(product);
+    } catch (err) {
+        res.status(400).json({ message: err.message || 'Unable to create product' });
+    }
+};
+
+exports.updateProduct = async (req, res) => {
+    try {
+        const product = await userService.updateProduct(req.params.id, req.body);
+        res.json(product);
+    } catch (err) {
+        res.status(err.message === 'Not Found' ? 404 : 400).json({ message: err.message || 'Unable to update product' });
+    }
+};
+
+exports.deleteProduct = async (req, res) => {
+    try {
+        await userService.deleteProduct(req.params.id);
+        res.status(204).end();
+    } catch (err) {
+        res.status(err.message === 'Not Found' ? 404 : 400).json({ message: err.message || 'Unable to delete product' });
+    }
+};
+
+exports.createCategory = async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ message: 'name is required' });
+        }
+
+        const category = await userService.createCategory({ name });
+        res.status(201).json(category);
+    } catch (err) {
+        res.status(400).json({ message: err.message || 'Unable to create category' });
+    }
+};
+
+exports.updateCategory = async (req, res) => {
+    try {
+        const category = await userService.updateCategory(req.params.id, req.body);
+        res.json(category);
+    } catch (err) {
+        res.status(err.message === 'Not Found' ? 404 : 400).json({ message: err.message || 'Unable to update category' });
+    }
+};
+
+exports.deleteCategory = async (req, res) => {
+    try {
+        await userService.deleteCategory(req.params.id);
+        res.status(204).end();
+    } catch (err) {
+        res.status(err.message === 'Not Found' ? 404 : 400).json({ message: err.message || 'Unable to delete category' });
+    }
+};
+
+exports.createBrand = async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ message: 'name is required' });
+        }
+
+        const brand = await userService.createBrand({ name });
+        res.status(201).json(brand);
+    } catch (err) {
+        res.status(400).json({ message: err.message || 'Unable to create brand' });
+    }
+};
+
+exports.updateBrand = async (req, res) => {
+    try {
+        const brand = await userService.updateBrand(req.params.id, req.body);
+        res.json(brand);
+    } catch (err) {
+        res.status(err.message === 'Not Found' ? 404 : 400).json({ message: err.message || 'Unable to update brand' });
+    }
+};
+
+exports.deleteBrand = async (req, res) => {
+    try {
+        await userService.deleteBrand(req.params.id);
+        res.status(204).end();
+    } catch (err) {
+        res.status(err.message === 'Not Found' ? 404 : 400).json({ message: err.message || 'Unable to delete brand' });
+    }
+};

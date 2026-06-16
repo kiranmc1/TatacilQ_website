@@ -55,3 +55,39 @@ exports.getAllHomeProducts = async () => {
     return await userrepo.getAllHomeProducts();
 };
 
+exports.createProduct = async (productData) => {
+    return await userrepo.createProduct(productData);
+};
+
+exports.updateProduct = async (productId, updates) => {
+    return await userrepo.updateProduct(productId, updates);
+};
+
+exports.deleteProduct = async (productId) => {
+    return await userrepo.deleteProduct(productId);
+};
+
+exports.createCategory = async (categoryData) => {
+    return await userrepo.createCategory(categoryData);
+};
+
+exports.updateCategory = async (categoryId, updates) => {
+    return await userrepo.updateCategory(categoryId, updates);
+};
+
+exports.deleteCategory = async (categoryId) => {
+    return await userrepo.deleteCategory(categoryId);
+};
+
+exports.createBrand = async (brandData) => {
+    return await userrepo.createBrand(brandData);
+};
+
+exports.updateBrand = async (brandId, updates) => {
+    return await userrepo.updateBrand(brandId, updates);
+};
+
+exports.deleteBrand = async (brandId) => {
+    return await userrepo.deleteBrand(brandId);
+};
+
