@@ -1,15 +1,30 @@
 const userService = require('../services/Userservice');
 const jwtUtils = require('../utils/jwt');
 
-exports.login = async (req, res) => {
+exports.register = async (req, res) => {
     try {
-        const { id, email } = req.body;
+        const { email, password, isAdmin = false } = req.body;
 
-        if (!id || !email) {
-            return res.status(400).json({ message: 'id and email are required' });
+        if (!email || !password) {
+            return res.status(400).json({ message: 'email and password are required' });
         }
 
-        const user = await userService.login(id, email);
+        const user = await userService.register(email, password, { isAdmin });
+        res.status(201).json({ user });
+    } catch (err) {
+        res.status(400).json({ message: err.message || 'Unable to register user' });
+    }
+};
+
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ message: 'email and password are required' });
+        }
+
+        const user = await userService.login(email, password);
 
         const token = jwtUtils.generateToken({
             id: user.id,

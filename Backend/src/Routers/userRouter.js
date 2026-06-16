@@ -4,6 +4,7 @@ const auth = require('../Middleware/auth');
 // const validateuserid = require('../Middleware/validateUser');
 const userController = require('../controllers/userContoller');
 
+router.post('/register', userController.register);
 router.post('/login', userController.login);
 router.get('/categories', userController.getAllCategories);
 router.get('/Homeproducts', userController.getAllHomeProducts);

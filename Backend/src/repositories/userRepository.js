@@ -4,7 +4,7 @@ const { connectDb } = require('../config/db');
 const toUserPayload = (user) => {
     if (!user) return null;
 
-    const { _id, ...rest } = user;
+    const { _id, password, ...rest } = user;
     return {
         id: _id ? _id.toString() : rest.id,
         ...rest
@@ -20,6 +20,18 @@ exports.findById = async (id) => {
 
     const user = await db.collection('Users').findOne(query);
     return toUserPayload(user);
+};
+
+exports.findByEmail = async (email) => {
+    const db = await connectDb();
+    return await db.collection('Users').findOne({ email });
+};
+
+exports.createUser = async (userData) => {
+    const db = await connectDb();
+    const result = await db.collection('Users').insertOne(userData);
+    const createdUser = await db.collection('Users').findOne({ _id: result.insertedId });
+    return toUserPayload(createdUser);
 };
 
 exports.getDashboardData = async (userId) => {
