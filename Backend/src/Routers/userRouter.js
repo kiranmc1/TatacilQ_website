@@ -2,7 +2,8 @@ const router = require('express').Router();
 const auth = require('../Middleware/auth');
 const admin = require('../Middleware/admin');
 // const logger = require('../../Middleware/logger');
-// const validateuserid = require('../Middleware/validateUser');
+
+
 const userController = require('../controllers/userContoller');
 
 router.post('/register', userController.register);
