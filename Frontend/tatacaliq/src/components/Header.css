@@ -1,0 +1,15 @@
+.logo-handler{
+    background-color: #212121;
+    color: white;
+}
+
+.logo{
+    background:url('https://www.tatacliq.com/src/general/components/img/TCF_logo.svg');
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 100px;
+    width: 225px;
+    margin-left: 25px;
+    position: absolute;
+    background-position: center;
+}

@@ -1,0 +1,22 @@
+.app-shell {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.app-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.app-main h1 {
+  font-size: 3rem;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.app-main p {
+  font-size: 1rem;
+  color: #6b7280;
+}
