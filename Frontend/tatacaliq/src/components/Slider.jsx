@@ -33,7 +33,6 @@ return(
         ))}
 
       </div>
-       {/* Prev button */}
       <button
         className="carousel-control-prev"
         type="button"
@@ -44,7 +43,6 @@ return(
         <span className="visually-hidden">Previous</span>
       </button>
 
-      {/* Next button */}
       <button
         className="carousel-control-next"
         type="button"
