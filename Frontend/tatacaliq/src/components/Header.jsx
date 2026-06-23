@@ -7,11 +7,16 @@ function Header() {
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [authMethod, setAuthMethod] = useState('mobile')
   const [authValue, setAuthValue] = useState('')
+  const [authStage, setAuthStage] = useState('entry')
+  const [otpCode, setOtpCode] = useState('')
+  const [sentOtp, setSentOtp] = useState(null)
   const recognitionRef = useRef(null)
 
   const isContinueEnabled = authMethod === 'mobile'
     ? /^\d{10}$/.test(authValue)
     : /^\S+@\S+\.\S+$/.test(authValue)
+
+  const isVerifyEnabled = /^\d{6}$/.test(otpCode)
 
   const handleSearchSubmit = (event) => {
     event.preventDefault()
@@ -64,12 +69,18 @@ function Header() {
     if (!showLoginModal) {
       setAuthMethod('mobile')
       setAuthValue('')
+      setAuthStage('entry')
+      setOtpCode('')
+      setSentOtp(null)
     }
   }, [showLoginModal])
 
   const toggleAuthMethod = () => {
     setAuthMethod((prev) => (prev === 'mobile' ? 'email' : 'mobile'))
     setAuthValue('')
+    setAuthStage('entry')
+    setOtpCode('')
+    setSentOtp(null)
   }
 
   const handleCloseModal = () => {
@@ -82,7 +93,7 @@ function Header() {
         [authMethod === 'mobile' ? 'phone' : 'email']: authValue,
       }
 
-      const response = await fetch('http://127.0.0.1:2000/Users/', {
+      const response = await fetch('http://127.0.0.1:2000/Users/send-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,15 +104,45 @@ function Header() {
       const data = await response.json()
 
       if (response.ok) {
-        console.log('Login successful:', data)
-        // Handle success - close modal or proceed to next step
-        setShowLoginModal(false)
+        setAuthStage('verify')
+        setOtpCode('')
+        setSentOtp(data.otp?.code || null)
       } else {
-        console.error('Login failed:', data.message)
-        alert(data.message || 'Login failed. Please try again.')
+        console.error('OTP request failed:', data.message)
+        alert(data.message || 'Unable to request OTP. Please try again.')
       }
     } catch (error) {
-      console.error('Error sending login data:', error)
+      console.error('Error sending OTP request:', error)
+      alert('An error occurred. Please try again.')
+    }
+  }
+
+  const handleVerifyOtp = async () => {
+    try {
+      const payload = {
+        [authMethod === 'mobile' ? 'phone' : 'email']: authValue,
+        code: otpCode,
+      }
+
+      const response = await fetch('http://127.0.0.1:2000/Users/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        console.log('OTP verified:', data)
+        setShowLoginModal(false)
+      } else {
+        console.error('OTP verification failed:', data.message)
+        alert(data.message || 'OTP verification failed. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error verifying OTP:', error)
       alert('An error occurred. Please try again.')
     }
   }
@@ -211,14 +252,49 @@ function Header() {
               >
                 {authMethod === 'mobile' ? 'Use Email Address' : 'Use Mobile Number'}
               </button>
-              <button
-                className="login-modal-primary"
-                type="button"
-                disabled={!isContinueEnabled}
-                onClick={handleContinue}
-              >
-                Continue
-              </button>
+              {authStage === 'entry' ? (
+                <button
+                  className="login-modal-primary"
+                  type="button"
+                  disabled={!isContinueEnabled}
+                  onClick={handleContinue}
+                >
+                  Send OTP
+                </button>
+              ) : (
+                <>
+                  <div className="login-modal-input-row">
+                    <input
+                      className="login-modal-input"
+                      type="tel"
+                      value={otpCode}
+                      onChange={(event) => setOtpCode(event.target.value)}
+                      placeholder="Enter 6-digit OTP"
+                      maxLength={6}
+                    />
+                  </div>
+                  <button
+                    className="login-modal-primary"
+                    type="button"
+                    disabled={!isVerifyEnabled}
+                    onClick={handleVerifyOtp}
+                  >
+                    Verify OTP
+                  </button>
+                  <button
+                    className="login-modal-secondary"
+                    type="button"
+                    onClick={() => setAuthStage('entry')}
+                  >
+                    Edit {authMethod === 'mobile' ? 'mobile' : 'email'}
+                  </button>
+                  {sentOtp && (
+                    <p className="login-modal-otp-hint">
+                      For development, OTP is: <strong>{sentOtp}</strong>
+                    </p>
+                  )}
+                </>
+              )}
               <p className="login-modal-terms">
                 This site is protected by reCAPTCHA and the Google <span>Privacy Policy</span> and <span>Terms of Service</span> apply.
                 By continuing, you agree to our <span>Terms of Use</span> and <span>Privacy Policy</span>

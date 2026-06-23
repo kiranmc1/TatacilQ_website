@@ -27,6 +27,43 @@ exports.findByEmail = async (email) => {
     return await db.collection('Users').findOne({ email });
 };
 
+exports.findByPhone = async (phone) => {
+    const db = await connectDb();
+    return await db.collection('Users').findOne({ phone });
+};
+
+exports.saveOtp = async ({ method, value, code, expiresAt }) => {
+    const db = await connectDb();
+    const result = await db.collection('Otps').insertOne({
+        method,
+        value,
+        code,
+        expiresAt,
+        used: false,
+        createdAt: new Date()
+    });
+    return result.insertedId;
+};
+
+exports.getValidOtp = async ({ method, value, code }) => {
+    const db = await connectDb();
+    return await db.collection('Otps').findOne({
+        method,
+        value,
+        code,
+        used: false,
+        expiresAt: { $gt: new Date() }
+    });
+};
+
+exports.markOtpUsed = async (otpId) => {
+    const db = await connectDb();
+    await db.collection('Otps').updateOne(
+        { _id: otpId },
+        { $set: { used: true, usedAt: new Date() } }
+    );
+};
+
 exports.createUser = async (userData) => {
     const db = await connectDb();
     const result = await db.collection('Users').insertOne(userData);

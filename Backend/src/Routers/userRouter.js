@@ -6,6 +6,8 @@ const admin = require('../Middleware/admin');
 const userController = require('../controllers/userContoller');
 const orderController = require('../controllers/orderController');
 
+router.post('/send-otp', userController.sendOtp);
+router.post('/verify-otp', userController.verifyOtp);
 router.post('/register', userController.register);
 router.post('/login', userController.login);
 router.get('/categories', userController.getAllCategories);

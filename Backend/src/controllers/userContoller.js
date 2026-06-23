@@ -3,16 +3,50 @@ const jwtUtils = require('../utils/jwt');
 
 exports.register = async (req, res) => {
     try {
-        const { email, password, isAdmin = false } = req.body;
+        const { email, phone, isAdmin = false } = req.body;
 
-        if (!email || !password) {
+        if (!email && !phone) {
             return res.status(400).json({ message: 'email and password are required' });
         }
 
-        const user = await userService.register(email, password, { isAdmin });
+        const user = await userService.register(email, phone, { isAdmin });
         res.status(201).json({ user });
     } catch (err) {
         res.status(400).json({ message: err.message || 'Unable to register user' });
+    }
+};
+
+exports.sendOtp = async (req, res) => {
+    try {
+        const { email, phone } = req.body;
+        if (!email && !phone) {
+            return res.status(400).json({ message: 'Email or phone is required' });
+        }
+
+        const otp = await userService.sendOtp({ email, phone });
+        res.json({ message: 'OTP sent', otp });
+    } catch (err) {
+        res.status(400).json({ message: err.message || 'Unable to send OTP' });
+    }
+};
+
+exports.verifyOtp = async (req, res) => {
+    try {
+        const { email, phone, code } = req.body;
+        if ((!email && !phone) || !code) {
+            return res.status(400).json({ message: 'Email/phone and OTP code are required' });
+        }
+
+        const user = await userService.verifyOtp({ email, phone, code });
+        const token = jwtUtils.generateToken({
+            id: user.id,
+            email: user.email,
+            role: user.isAdmin ? 'admin' : 'user'
+        });
+
+        res.json({ token, user });
+    } catch (err) {
+        res.status(401).json({ message: err.message || 'Invalid OTP' });
     }
 };
 
