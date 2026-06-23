@@ -76,6 +76,36 @@ function Header() {
     setShowLoginModal(false)
   }
 
+  const handleContinue = async () => {
+    try {
+      const payload = {
+        [authMethod === 'mobile' ? 'phone' : 'email']: authValue,
+      }
+
+      const response = await fetch('http://127.0.0.1:2000/Users/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        console.log('Login successful:', data)
+        // Handle success - close modal or proceed to next step
+        setShowLoginModal(false)
+      } else {
+        console.error('Login failed:', data.message)
+        alert(data.message || 'Login failed. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error sending login data:', error)
+      alert('An error occurred. Please try again.')
+    }
+  }
+
   return (
     <>
       <div className='logo-handler'>
@@ -185,6 +215,7 @@ function Header() {
                 className="login-modal-primary"
                 type="button"
                 disabled={!isContinueEnabled}
+                onClick={handleContinue}
               >
                 Continue
               </button>
