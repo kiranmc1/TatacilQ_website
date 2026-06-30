@@ -1,6 +1,16 @@
 const userService = require('../services/Userservice');
 const jwtUtils = require('../utils/jwt');
 
+const isFlagEnabled = (value) => {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return value === 1;
+    if (typeof value === 'string') {
+        const normalized = value.trim().toLowerCase();
+        return normalized === 'true' || normalized === '1' || normalized === 'yes' || normalized === 'y';
+    }
+    return false;
+};
+
 exports.register = async (req, res) => {
     try {
         const { email, phone, isAdmin = false } = req.body;
@@ -41,7 +51,7 @@ exports.verifyOtp = async (req, res) => {
         const token = jwtUtils.generateToken({
             id: user.id,
             email: user.email,
-            role: user.isAdmin ? 'admin' : 'user'
+            role: isFlagEnabled(user.isAdmin) ? 'admin' : isFlagEnabled(user.isVendor) ? 'vendor' : 'user'
         });
 
         res.json({ token, user });
@@ -63,7 +73,7 @@ exports.login = async (req, res) => {
         const token = jwtUtils.generateToken({
             id: user.id,
             email: user.email,
-            role: user.isAdmin ? 'admin' : 'user'
+            role: isFlagEnabled(user.isAdmin) ? 'admin' : isFlagEnabled(user.isVendor) ? 'vendor' : 'user'
         });
 
         res.json({ token });
@@ -83,6 +93,15 @@ exports.getDashboard = async (req, res) => {
     }
 };
 
+exports.getMe = async (req, res) => {
+    try {
+        const user = await userService.getCurrentUser(req.user.id);
+        res.json({ user });
+    } catch (err) {
+        res.status(404).json({ message: err.message || 'User not found' });
+    }
+};
+
 exports.getAllCategories = async (req, res) => {
     try {
         const categories = await userService.getAllCategories();
@@ -90,6 +109,17 @@ exports.getAllCategories = async (req, res) => {
     } catch (err) {
         res.status(500).json({
             message: err.message || 'Failed to fetch categories'
+        });
+    }
+};
+
+exports.getAllBrands = async (req, res) => {
+    try {
+        const brands = await userService.getAllBrands();
+        res.json(brands);
+    } catch (err) {
+        res.status(500).json({
+            message: err.message || 'Failed to fetch brands'
         });
     }
 };
@@ -105,17 +135,159 @@ exports.getAllHomeProducts = async (req, res) => {
     }
 };
 
-exports.createProduct = async (req, res) => {
+exports.getProducts = async (req, res) => {
     try {
-        const { name, price, categoryId, brandId, image, description } = req.body;
-        if (!name || price == null || !categoryId || !brandId) {
-            return res.status(400).json({ message: 'name, price, categoryId, and brandId are required' });
+        const products = await userService.getProducts(req.query.categoryId);
+        res.json(products);
+    } catch (err) {
+        res.status(500).json({
+            message: err.message || 'Failed to fetch products'
+        });
+    }
+};
+
+exports.getProductById = async (req, res) => {
+    try {
+        const product = await userService.getProductById(req.params.id);
+
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
         }
 
-        const product = await userService.createProduct({ name, price, categoryId, brandId, image, description });
+        res.json(product);
+    } catch (err) {
+        res.status(500).json({
+            message: err.message || 'Failed to fetch product'
+        });
+    }
+};
+
+exports.createProduct = async (req, res) => {
+    try {
+        const {
+            name,
+            brand,
+            categoryName,
+            categoryId,
+            categoryid,
+            originalPrice,
+            salePrice,
+            discount,
+            ratings,
+            reviews,
+            offers,
+            ratingText,
+            images,
+            price,
+            image,
+            description,
+        } = req.body;
+
+        if (!name || !brand || (!categoryName && !categoryId && !categoryid)) {
+            return res.status(400).json({ message: 'name, brand, and a category are required' });
+        }
+
+        const product = await userService.createProduct({
+            ...req.body,
+            name,
+            brand,
+            categoryName,
+            categoryId: categoryId || categoryid,
+            originalPrice: originalPrice ?? price ?? salePrice ?? 0,
+            salePrice: salePrice ?? price ?? originalPrice ?? 0,
+            discount: discount ?? 0,
+            ratings: ratings ?? 0,
+            reviews: reviews ?? 0,
+            offers: offers ?? [],
+            ratingText: ratingText ?? '',
+            images: images ?? (image ? [image] : []),
+            description: description ?? '',
+            approved: true,
+            vendorId: null,
+            status: 'approved',
+            display: 1
+        });
         res.status(201).json(product);
     } catch (err) {
         res.status(400).json({ message: err.message || 'Unable to create product' });
+    }
+};
+
+exports.submitVendorProduct = async (req, res) => {
+    try {
+        const {
+            name,
+            brand,
+            categoryName,
+            categoryId,
+            categoryid,
+            originalPrice,
+            salePrice,
+            discount,
+            ratings,
+            reviews,
+            offers,
+            ratingText,
+            images,
+            price,
+            image,
+            description,
+        } = req.body;
+
+        if (!name || !brand || (!categoryName && !categoryId && !categoryid)) {
+            return res.status(400).json({ message: 'name, brand, and a category are required' });
+        }
+
+        const product = await userService.submitVendorProduct({
+            ...req.body,
+            name,
+            brand,
+            categoryName,
+            categoryId: categoryId || categoryid,
+            originalPrice: originalPrice ?? price ?? salePrice ?? 0,
+            salePrice: salePrice ?? price ?? originalPrice ?? 0,
+            discount: discount ?? 0,
+            ratings: ratings ?? 0,
+            reviews: reviews ?? 0,
+            offers: offers ?? [],
+            ratingText: ratingText ?? '',
+            images: images ?? (image ? [image] : []),
+            description: description ?? '',
+            vendorId: req.user.id,
+            approved: false,
+            status: 'pending',
+            display: 0
+        });
+        res.status(201).json(product);
+    } catch (err) {
+        res.status(400).json({ message: err.message || 'Unable to submit vendor product' });
+    }
+};
+
+exports.getVendorProducts = async (req, res) => {
+    try {
+        const products = await userService.getVendorProducts(req.user.id);
+        res.json(products);
+    } catch (err) {
+        res.status(400).json({ message: err.message || 'Unable to retrieve vendor products' });
+    }
+};
+
+exports.getPendingVendorProducts = async (req, res) => {
+    try {
+        const products = await userService.getPendingVendorProducts();
+        res.json(products);
+    } catch (err) {
+        res.status(400).json({ message: err.message || 'Unable to retrieve pending products' });
+    }
+};
+
+exports.approveVendorProduct = async (req, res) => {
+    try {
+        const product = await userService.approveVendorProduct(req.params.id, req.user.id);
+        res.json(product);
+    } catch (err) {
+        res.status(err.message === 'Not Found' ? 404 : 400).json({ message: err.message || 'Unable to approve vendor product' });
     }
 };
 
@@ -139,12 +311,12 @@ exports.deleteProduct = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
     try {
-        const { name } = req.body;
+        const { name, imageUrl } = req.body;
         if (!name) {
             return res.status(400).json({ message: 'name is required' });
         }
 
-        const category = await userService.createCategory({ name });
+        const category = await userService.createCategory({ name, imageUrl });
         res.status(201).json(category);
     } catch (err) {
         res.status(400).json({ message: err.message || 'Unable to create category' });

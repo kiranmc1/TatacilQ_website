@@ -12,17 +12,12 @@ const isFlagEnabled = (value) => {
 
 module.exports = async (req, res, next) => {
     try {
-        if (!req.user?.id) {
-            return res.status(403).json({ message: 'Admin access required' });
+        const user = await userrepo.findById(req.user?.id);
+        if (!user || !isFlagEnabled(user.isVendor)) {
+            return res.status(403).json({ message: 'Vendor access required' });
         }
-
-        const user = await userrepo.findById(req.user.id);
-        if (!user || !isFlagEnabled(user.isAdmin)) {
-            return res.status(403).json({ message: 'Admin access required' });
-        }
-
         next();
     } catch (err) {
-        return res.status(500).json({ message: 'Unable to validate admin access' });
+        return res.status(500).json({ message: 'Unable to validate vendor access' });
     }
 };

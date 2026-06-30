@@ -1,7 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './Header.css'
+import CategoryDropdown from './CategoryDropdown'
+import BrandsDropdown from './BrandsDropdown'
+
+const normalizeFlag = (value) => {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return value === 1
+  if (typeof value === 'string') {
+    const trimmed = value.trim().toLowerCase()
+    return trimmed === 'true' || trimmed === '1' || trimmed === 'yes' || trimmed === 'y'
+  }
+  return false
+}
 
 function Header() {
+  const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [isListening, setIsListening] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -10,7 +24,67 @@ function Header() {
   const [authStage, setAuthStage] = useState('entry')
   const [otpCode, setOtpCode] = useState('')
   const [sentOtp, setSentOtp] = useState(null)
+  const [user, setUser] = useState(() => {
+    if (typeof window === 'undefined') return null
+    const storedUser = window.localStorage.getItem('cliqUser')
+    if (!storedUser) return null
+    try {
+      return JSON.parse(storedUser)
+    } catch (err) {
+      console.warn('Unable to parse stored user', err)
+      window.localStorage.removeItem('cliqUser')
+      return null
+    }
+  })
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const [showLoginSuccess, setShowLoginSuccess] = useState(false)
+  const [isAdminUser, setIsAdminUser] = useState(() => normalizeFlag(user?.isAdmin))
+  const [isVendorUser, setIsVendorUser] = useState(() => normalizeFlag(user?.isVendor))
   const recognitionRef = useRef(null)
+
+  useEffect(() => {
+    if (user) {
+      window.localStorage.setItem('cliqUser', JSON.stringify(user))
+      setShowLoginModal(false)
+    } else {
+      window.localStorage.removeItem('cliqUser')
+    }
+  }, [user])
+
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      if (!user?.token) {
+        setIsAdminUser(false)
+        setIsVendorUser(false)
+        return
+      }
+
+      setIsAdminUser(normalizeFlag(user?.isAdmin))
+      setIsVendorUser(normalizeFlag(user?.isVendor))
+
+      try {
+        const response = await fetch('http://127.0.0.1:2000/Users/me', {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error('Unable to load profile')
+        }
+
+        const data = await response.json()
+        setIsAdminUser(normalizeFlag(data?.user?.isAdmin))
+        setIsVendorUser(normalizeFlag(data?.user?.isVendor))
+      } catch (error) {
+        console.warn('Unable to refresh profile flags', error)
+        setIsAdminUser(false)
+        setIsVendorUser(false)
+      }
+    }
+
+    loadCurrentUser()
+  }, [user])
 
   const isContinueEnabled = authMethod === 'mobile'
     ? /^\d{10}$/.test(authValue)
@@ -106,7 +180,7 @@ function Header() {
       if (response.ok) {
         setAuthStage('verify')
         setOtpCode('')
-        setSentOtp(data.otp?.code || null)
+        setSentOtp(data.code || data.otp?.code || null)
       } else {
         console.error('OTP request failed:', data.message)
         alert(data.message || 'Unable to request OTP. Please try again.')
@@ -135,7 +209,14 @@ function Header() {
       const data = await response.json()
 
       if (response.ok) {
-        console.log('OTP verified:', data)
+        const signedInUser = {
+          ...(data.user || {}),
+          token: data.token,
+          email: data.user?.email || authValue,
+          phone: data.user?.phone || authValue,
+        }
+        setUser(signedInUser)
+        setShowLoginSuccess(true)
         setShowLoginModal(false)
       } else {
         console.error('OTP verification failed:', data.message)
@@ -146,6 +227,50 @@ function Header() {
       alert('An error occurred. Please try again.')
     }
   }
+
+  const handleLogout = () => {
+    setUser(null)
+    setIsAdminUser(false)
+    setIsVendorUser(false)
+    setProfileMenuOpen(false)
+    setShowLoginSuccess(false)
+    setShowLoginModal(false)
+    window.localStorage.removeItem('cliqUser')
+  }
+
+  const handlePortalAccess = (path) => {
+    if (!user?.token) {
+      setShowLoginModal(true)
+      setProfileMenuOpen(false)
+      return
+    }
+
+    if (path === '/admin' && !isAdminUser) {
+      alert('Only admin users can access this portal.')
+      return
+    }
+
+    if (path === '/vendor' && !isVendorUser) {
+      alert('Only vendor users can access this portal.')
+      return
+    }
+
+    navigate(path)
+    setProfileMenuOpen(false)
+  }
+
+  const handleCloseSuccess = () => {
+    setShowLoginSuccess(false)
+  }
+
+  const profileMenuItems = [
+    { label: 'My account', icon: '👤' },
+    { label: 'Order History', icon: '🛒' },
+    { label: 'My Wishlist', icon: '💖' },
+    { label: 'Alerts & Coupon', icon: '🔔' },
+    { label: 'Gift Card', icon: '🎁' },
+    { label: 'CLiQ Cash', icon: '💰' }
+  ]
 
   return (
     <>
@@ -175,7 +300,44 @@ function Header() {
                   <li className="nav-item">
                     <a className="nav-link text-white" href="#">Track Orders</a>
                   </li>
+                  {isAdminUser && (
+                    <li className="nav-item">
+                      <button
+                        className="nav-link text-white header-nav-button"
+                        type="button"
+                        onClick={() => handlePortalAccess('/admin')}
+                      >
+                        Admin Portal
+                      </button>
+                    </li>
+                  )}
+                  {isVendorUser && (
+                    <li className="nav-item">
+                      <button
+                        className="nav-link text-white header-nav-button"
+                        type="button"
+                        onClick={() => handlePortalAccess('/vendor')}
+                      >
+                        Vendor Portal
+                      </button>
+                    </li>
+                  )}
                   <li className="nav-item">
+                    {user ? (
+                      <button
+                        className="nav-link text-white header-profile-button"
+                        type="button"
+                        onClick={() => setProfileMenuOpen((open) => !open)}
+                      >
+                        <div className="profile-chip">
+                          <span>{user.name ? user.name[0] : user.email?.[0] || 'U'}</span>
+                          <div>
+                          <strong>{user.name || user.email || user.phone || 'My Profile'}</strong>
+                          <small>My Profile</small>
+                        </div>
+                      </div>
+                    </button>
+                  ) : (
                     <button
                       className="nav-link text-white header-login-button"
                       type="button"
@@ -183,17 +345,59 @@ function Header() {
                     >
                       Login / Register
                     </button>
+                  )}
                   </li>
                 </ul>
               </div>
             </div>
           </nav>
+          {profileMenuOpen && user && (
+            <div className="profile-menu">
+              <div className="profile-menu-card">
+                <div className="profile-menu-header">
+                  <span>{user.name ? user.name[0] : user.email?.[0] || 'U'}</span>
+                  <div>
+                    <strong>{user.name || user.email || user.phone || 'User'}</strong>
+                    <p>Premium Member</p>
+                  </div>
+                </div>
+                <div className="profile-menu-items">
+                  {isAdminUser && (
+                    <button type="button" className="profile-menu-item" onClick={() => handlePortalAccess('/admin')}>
+                      <span className="profile-menu-icon">🛡️</span>
+                      <span>Admin Portal</span>
+                    </button>
+                  )}
+                  {isVendorUser && (
+                    <button type="button" className="profile-menu-item" onClick={() => handlePortalAccess('/vendor')}>
+                      <span className="profile-menu-icon">🏪</span>
+                      <span>Vendor Portal</span>
+                    </button>
+                  )}
+                  {profileMenuItems.map((item) => (
+                    <button key={item.label} type="button" className="profile-menu-item">
+                      <span className="profile-menu-icon">{item.icon}</span>
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                  <button type="button" className="profile-menu-item profile-menu-logout" onClick={handleLogout}>
+                    <span className="profile-menu-icon">🚪</span>
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        <div className='container left-margin'>
-          <div className='row'>
-            <div className='col-md-3'>Category</div>
-            <div className='col-md-3'>Brands</div>
-            <div className='col-md-3'>
+        <div className='container left-margin header-links-row'>
+          <div className='row align-items-center'>
+            <div className='col-md-2 col-6'>
+              <CategoryDropdown />
+            </div>
+            <div className='col-md-2 col-6'>
+              <BrandsDropdown />
+            </div>
+            <div className='col-md-5'>
               <form className="d-flex voice-search-form" onSubmit={handleSearchSubmit}>
                 <input
                   className="form-control me-2"
@@ -216,11 +420,30 @@ function Header() {
                 </button>
               </form>
             </div>
-            <div className='col-md-3'>icons</div>
+            <div className='col-md-3 col-6 text-end header-link-item'>icons</div>
           </div>
         </div>
       </div>
 
+      {showLoginSuccess && (
+        <div className="login-success-backdrop" role="dialog" aria-modal="true">
+          <div className="login-success-modal">
+            <button className="login-success-close" onClick={handleCloseSuccess} aria-label="Close">
+              ×
+            </button>
+            <div className="login-success-illustration">
+              <div className="login-success-image"></div>
+            </div>
+            <div className="login-success-content">
+              <h2>You're Successfully Logged In</h2>
+              <p>Start CLiQing</p>
+              <button type="button" className="login-success-button" onClick={handleCloseSuccess}>
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {showLoginModal && (
         <div className="login-modal-backdrop" role="dialog" aria-modal="true">
           <div className="login-modal">

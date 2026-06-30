@@ -1,0 +1,208 @@
+.shop-drop-section {
+  padding: 3rem 1rem;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  margin: 0.25rem 0 0;
+  font-size: clamp(1.75rem, 2vw, 2.3rem);
+  color: #111827;
+}
+
+.eyebrow {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #d70b5c;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.section-link {
+  color: #111827;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.section-link:hover {
+  text-decoration: underline;
+}
+
+.shop-drop-status {
+  color: #4b5563;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.shop-drop-error {
+  color: #b91c1c;
+}
+
+.category-grid,
+.brand-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.category-grid {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  margin-bottom: 1rem;
+}
+
+.category-card,
+.brand-card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+}
+
+.category-card-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  max-height: 120px;
+  padding: 0.10rem;
+  /**background: linear-gradient(180deg, #f6f4ff 0%, #ede9fe 100%);**/
+}
+
+.category-image-link {
+  display: inline-flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.category-image-link img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.category-image-link span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #111827;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* .category-card-image span {
+  font-size: 2.3rem;
+  font-weight: 800;
+  color: #4f46e5;
+} */
+
+.category-card-content {
+  padding: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.category-card-content h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #111827;
+}
+
+.category-card-content p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.category-card-content button,
+.brand-card button {
+  margin-top: auto;
+  border: none;
+  cursor: pointer;
+  border-radius: 9999px;
+  padding: 0.8rem 1.2rem;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #d70b5c, #f43f5e);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-card-content button:hover,
+.brand-card button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(215, 11, 92, 0.25);
+}
+
+.brand-spotlight {
+  padding: 2rem 0 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.brand-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.brand-card {
+  padding: 1.5rem;
+  gap: 1rem;
+}
+
+.brand-card-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.brand-card-body h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #111827;
+}
+
+.brand-card-body p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.theme-0 .category-card-image { background: linear-gradient(180deg, #eef2ff 0%, #e0e7ff 100%); }
+.theme-1 .category-card-image { background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%); }
+.theme-2 .category-card-image { background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%); }
+.theme-3 .category-card-image { background: linear-gradient(180deg, #ede9fe 0%, #ddd6fe 100%); }
+.theme-4 .category-card-image { background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%); }
+
+@media (max-width: 640px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.shopHeading{
+    margin-left:50%;
+}

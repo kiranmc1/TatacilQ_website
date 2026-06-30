@@ -101,14 +101,27 @@ exports.getAllCategories = async () => {
 
     const categories = await db.collection('Categories')
         .find({})
-        .project({ _id: 1, name: 1, createdAt: 1 })
-        .sort({ createdAt: -1 })
+        .project({ _id: 1, name: 1, imageUrl: 1 })
         .toArray();
 
     return categories.map((category) => ({
         id: category._id.toString(),
         name: category.name,
-        createdAt: category.createdAt
+        imageUrl: category.imageUrl
+    }));
+};
+
+exports.getAllBrands = async () => {
+    const db = await connectDb();
+
+    const brands = await db.collection('Brands')
+        .find({})
+        .project({ _id: 1, name: 1 })
+        .toArray();
+
+    return brands.map((brand) => ({
+        id: brand._id.toString(),
+        name: brand.name
     }));
 };
 
@@ -116,7 +129,7 @@ exports.getAllHomeProducts = async () => {
     const db = await connectDb();
 
     const products = await db.collection('Products')
-        .find({})
+        .find({ approved: true, display: 1 })
         .sort({ createdAt: -1 })
         .project({ _id: 1, name: 1, price: 1, image: 1, categoryId: 1, brandId: 1, createdAt: 1 })
         .toArray();
@@ -132,28 +145,145 @@ exports.getAllHomeProducts = async () => {
     }));
 };
 
+const normalizeProduct = (product) => {
+    if (!product) return null;
+
+    const sourceId = product._id ? product._id.toString() : null;
+
+    return {
+        ...product,
+        id: product.id ?? sourceId,
+        _id: sourceId,
+        image: product.image || (Array.isArray(product.images) ? product.images[0] : null),
+        images: Array.isArray(product.images)
+            ? product.images
+            : product.image
+                ? [product.image]
+                : [],
+        originalPrice: product.originalPrice ?? product.price ?? 0,
+        salePrice: product.salePrice ?? product.price ?? 0,
+        discount: product.discount ?? 0,
+        ratings: product.ratings ?? 0,
+        reviews: product.reviews ?? 0,
+        offers: Array.isArray(product.offers)
+            ? product.offers
+            : product.offer
+                ? [product.offer]
+                : [],
+        ratingText: product.ratingText || '',
+        categoryid: product.categoryid ?? product.categoryId ?? null,
+        categoryId: product.categoryid ?? product.categoryId ?? null,
+        display: product.display != null ? product.display : (product.approved ? 1 : 0),
+    };
+};
+
+exports.getProducts = async (categoryId) => {
+    const db = await connectDb();
+
+    const query = categoryId ? { categoryid: categoryId, approved: true, display: 1 } : { approved: true, display: 1 };
+    const products = await db.collection('Products').find(query).toArray();
+
+    return products.map(normalizeProduct);
+};
+
+exports.getProductsByVendor = async (vendorId) => {
+    const db = await connectDb();
+    const products = await db.collection('Products').find({ vendorId }).sort({ submittedAt: -1 }).toArray();
+    return products.map(normalizeProduct);
+};
+
+exports.getPendingVendorProducts = async () => {
+    const db = await connectDb();
+    const products = await db.collection('Products')
+        .find({ approved: false, status: 'pending' })
+        .sort({ submittedAt: -1 })
+        .toArray();
+    return products.map(normalizeProduct);
+};
+
+exports.approveProductById = async (productId, adminId) => {
+    const db = await connectDb();
+    
+    // First, find the product to verify it exists and is pending
+    let findQuery;
+    if (ObjectId.isValid(productId)) {
+        findQuery = { $or: [{ _id: new ObjectId(productId) }, { id: productId }] };
+    } else {
+        findQuery = { $or: [{ id: productId }, { id: Number(productId) }] };
+    }
+
+    const existingProduct = await db.collection('Products').findOne(findQuery);
+    
+    if (!existingProduct) {
+        throw new Error('Not Found');
+    }
+
+    // Verify it's actually pending before approving
+    if (existingProduct.approved || existingProduct.status !== 'pending') {
+        throw new Error('Product is not pending approval');
+    }
+
+    // Now approve it
+    const result = await db.collection('Products').findOneAndUpdate(
+        findQuery,
+        {
+            $set: {
+                approved: true,
+                status: 'approved',
+                display: 1,
+                approvedAt: new Date(),
+                approvedBy: adminId,
+                updatedAt: new Date()
+            }
+        },
+        { returnDocument: 'after' }
+    );
+
+    if (!result.value) {
+        throw new Error('Not Found');
+    }
+
+    return normalizeProduct(result.value);
+};
+
+exports.getProductById = async (productId) => {
+    const db = await connectDb();
+
+    const query = ObjectId.isValid(productId)
+        ? { $or: [{ _id: new ObjectId(productId) }, { id: productId }, { id: Number(productId) }] }
+        : { $or: [{ id: productId }, { id: Number(productId) }] };
+
+    const product = await db.collection('Products').findOne(query);
+    return normalizeProduct(product);
+};
+
+exports.findCategoryByName = async (name) => {
+    const db = await connectDb();
+    const normalizedName = (name || '').trim();
+
+    if (!normalizedName) {
+        return null;
+    }
+
+    return await db.collection('Categories').findOne({
+        name: { $regex: new RegExp(`^${normalizedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+    });
+};
+
 exports.createProduct = async (productData) => {
     const db = await connectDb();
     const now = new Date();
+    const nextId = (await db.collection('Products').countDocuments()) + 1;
 
     const result = await db.collection('Products').insertOne({
         ...productData,
+        id: nextId,
         createdAt: now,
         updatedAt: now
     });
 
     const product = await db.collection('Products').findOne({ _id: result.insertedId });
-    return {
-        id: product._id.toString(),
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        description: product.description,
-        categoryId: product.categoryId ? product.categoryId.toString() : null,
-        brandId: product.brandId ? product.brandId.toString() : null,
-        createdAt: product.createdAt,
-        updatedAt: product.updatedAt
-    };
+    return normalizeProduct(product);
 };
 
 exports.updateProduct = async (productId, updates) => {
@@ -206,6 +336,8 @@ exports.createCategory = async (categoryData) => {
     return {
         id: category._id.toString(),
         name: category.name,
+        imageUrl: category.imageUrl,
+        description: category.description,
         createdAt: category.createdAt,
         updatedAt: category.updatedAt
     };
@@ -228,6 +360,8 @@ exports.updateCategory = async (categoryId, updates) => {
     return {
         id: category._id.toString(),
         name: category.name,
+        imageUrl: category.imageUrl,
+        description: category.description,
         createdAt: category.createdAt,
         updatedAt: category.updatedAt
     };
