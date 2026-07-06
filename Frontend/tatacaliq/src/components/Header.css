@@ -109,6 +109,36 @@
     text-decoration: none;
 }
 
+.header-top-icons {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.header-icon-button {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    padding: 0;
+}
+
+.header-icon-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.header-icon-button:hover,
+.header-icon-button:focus {
+    transform: translateY(-1px);
+}
+
 .profile-chip {
     display: inline-flex;
     align-items: center;

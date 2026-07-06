@@ -286,7 +286,17 @@ function Header() {
               <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                   <li className="nav-item">
-                    <a className="nav-link active text-white" aria-current="page" href="#">Home</a>
+                    <a
+                      className="nav-link active text-white"
+                      aria-current="page"
+                      href="/"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        navigate('/')
+                      }}
+                    >
+                      Home
+                    </a>
                   </li>
                   <li className="nav-item">
                     <a className="nav-link text-white" href="#">CLIQ Cash</a>
@@ -420,7 +430,26 @@ function Header() {
                 </button>
               </form>
             </div>
-            <div className='col-md-3 col-6 text-end header-link-item'>icons</div>
+            <div className='col-md-3 col-6 text-end header-top-icons'>
+              <button type='button' className='header-icon-button' aria-label='Wishlist'>
+                <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                  <path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z' />
+                </svg>
+              </button>
+              <button type='button' className='header-icon-button' aria-label='Notifications'>
+                <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                  <path d='M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9' />
+                  <path d='M13.73 21a2 2 0 0 1-3.46 0' />
+                </svg>
+              </button>
+              <button type='button' className='header-icon-button' aria-label='Shopping Cart'>
+                <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                  <path d='M6 6h15l-1.5 9h-13z' />
+                  <circle cx='9' cy='20' r='1' />
+                  <circle cx='18' cy='20' r='1' />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>

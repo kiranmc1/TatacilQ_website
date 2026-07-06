@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 const initialForm = {
@@ -26,6 +26,7 @@ function AdminPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [feedback, setFeedback] = useState({ type: '', message: '' })
+  const editSectionRef = useRef(null)
 
   useEffect(() => {
     const storedUser = window.localStorage.getItem('cliqUser')
@@ -72,6 +73,12 @@ function AdminPage() {
       navigate('/')
     }
   }, [navigate])
+
+  useEffect(() => {
+    if (selectedProductId && editSectionRef.current) {
+      editSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [selectedProductId])
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -303,67 +310,82 @@ function AdminPage() {
         ) : null}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '1.5rem' }}>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
+          <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
+              <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
                 Category Name
-                <input name="categoryName" value={form.categoryName} onChange={handleChange} placeholder="e.g. Men" style={inputStyle} />
+                <input name="categoryName" value={form.categoryName} onChange={handleChange} placeholder="e.g. Men" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
               </label>
-              <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
+              <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
                 Brand
-                <input name="brand" value={form.brand} onChange={handleChange} placeholder="e.g. U.S. Polo Assn." style={inputStyle} />
+                <input name="brand" value={form.brand} onChange={handleChange} placeholder="e.g. U.S. Polo Assn." style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
               </label>
             </div>
 
-            <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
+            <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
               Product Name
-              <input name="name" value={form.name} onChange={handleChange} placeholder="e.g. Blue Cotton Striped T-Shirt" style={inputStyle} />
+              <input name="name" value={form.name} onChange={handleChange} placeholder="e.g. Blue Cotton Striped T-Shirt" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
             </label>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
+              <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
                 Original Price
-                <input name="originalPrice" type="number" value={form.originalPrice} onChange={handleChange} placeholder="2499" style={inputStyle} />
+                <input name="originalPrice" type="number" value={form.originalPrice} onChange={handleChange} placeholder="2499" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
               </label>
-              <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
+              <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
                 Sale Price
-                <input name="salePrice" type="number" value={form.salePrice} onChange={handleChange} placeholder="1749" style={inputStyle} />
+                <input name="salePrice" type="number" value={form.salePrice} onChange={handleChange} placeholder="1749" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
               </label>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
+              <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
                 Discount (%)
-                <input name="discount" type="number" value={form.discount} onChange={handleChange} placeholder="30" style={inputStyle} />
+                <input name="discount" type="number" value={form.discount} onChange={handleChange} placeholder="30" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
               </label>
-              <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
+              <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
                 Ratings
-                <input name="ratings" step="0.1" type="number" value={form.ratings} onChange={handleChange} placeholder="4.4" style={inputStyle} />
+                <input name="ratings" step="0.1" type="number" value={form.ratings} onChange={handleChange} placeholder="4.4" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
               </label>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
+              <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
                 Reviews Count
-                <input name="reviews" type="number" value={form.reviews} onChange={handleChange} placeholder="26" style={inputStyle} />
+                <input name="reviews" type="number" value={form.reviews} onChange={handleChange} placeholder="26" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
               </label>
-              <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
+              <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
                 Rating Text
-                <input name="ratingText" value={form.ratingText} onChange={handleChange} placeholder="Popular: Recently wishlisted 55 times" style={inputStyle} />
+                <input name="ratingText" value={form.ratingText} onChange={handleChange} placeholder="Popular: Recently wishlisted 55 times" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
               </label>
             </div>
 
-            <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
+            <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
               Offers (comma separated)
-              <input name="offers" value={form.offers} onChange={handleChange} placeholder="Buy 2 get 10% off, Buy 3 or more and get 15% off" style={inputStyle} />
+              <input name="offers" value={form.offers} onChange={handleChange} placeholder="Buy 2 get 10% off, Buy 3 or more and get 15% off" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
             </label>
 
-            <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
+            <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
               Image URLs (comma separated)
-              <input name="images" value={form.images} onChange={handleChange} placeholder="https://example.com/1.jpg, https://example.com/2.jpg" style={inputStyle} />
+              <input name="images" value={form.images} onChange={handleChange} placeholder="https://example.com/1.jpg, https://example.com/2.jpg" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
             </label>
 
-            <button type="submit" disabled={isSubmitting} style={{ border: 'none', background: '#d70b5c', color: 'white', borderRadius: '999px', padding: '0.9rem 1.25rem', fontWeight: 700, cursor: 'pointer' }}>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                border: 'none',
+                background: '#d70b5c',
+                color: 'white',
+                borderRadius: '999px',
+                padding: '0.6rem 0.9rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                width: 'fit-content',
+                alignSelf: 'start',
+              }}
+            >
               {isSubmitting ? 'Saving product...' : 'Add Product'}
             </button>
           </form>
@@ -393,6 +415,82 @@ function AdminPage() {
                 ) : null}
               </div>
 
+              {selectedProductId ? (
+                <form ref={editSectionRef} onSubmit={handleUpdateSubmit} style={{ display: 'grid', gap: '1rem', marginBottom: '1rem' }}>
+                  <h4 style={{ margin: 0 }}>Update selected product</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                      Category Name
+                      <input name="categoryName" value={editForm.categoryName} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                    <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                      Brand
+                      <input name="brand" value={editForm.brand} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                  </div>
+                  <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                    Product Name
+                    <input name="name" value={editForm.name} onChange={handleEditChange} style={inputStyle} />
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                      Original Price
+                      <input name="originalPrice" type="number" value={editForm.originalPrice} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                    <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                      Sale Price
+                      <input name="salePrice" type="number" value={editForm.salePrice} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                      Discount
+                      <input name="discount" type="number" value={editForm.discount} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                    <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                      Ratings
+                      <input name="ratings" type="number" step="0.1" value={editForm.ratings} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                      Reviews
+                      <input name="reviews" type="number" value={editForm.reviews} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                    <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                      Rating Text
+                      <input name="ratingText" value={editForm.ratingText} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                  </div>
+                    <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                      Offers (comma separated)
+                      <input name="offers" value={editForm.offers} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                    <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                    Image URLs (comma separated)
+                    <input name="images" value={editForm.images} onChange={handleEditChange} style={inputStyle} />
+                  </label>
+                  <button
+                    type="submit"
+                    disabled={isUpdating}
+                    style={{
+                      border: 'none',
+                      background: '#d70b5c',
+                      color: 'white',
+                      borderRadius: '999px',
+                      padding: '0.6rem 0.9rem',
+                      cursor: 'pointer',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      width: 'fit-content',
+                      alignSelf: 'start',
+                    }}
+                  >
+                    {isUpdating ? 'Updating...' : 'Update Product'}
+                  </button>
+                </form>
+              ) : null}
+
               {products.length > 0 ? (
                 <div style={{ display: 'grid', gap: '0.7rem' }}>
                   {products.map((product) => (
@@ -417,67 +515,6 @@ function AdminPage() {
               ) : (
                 <p style={{ color: '#6b7280', margin: 0 }}>No products available yet.</p>
               )}
-
-              {selectedProductId ? (
-                <form onSubmit={handleUpdateSubmit} style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
-                  <h4 style={{ margin: 0 }}>Update selected product</h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
-                      Category Name
-                      <input name="categoryName" value={editForm.categoryName} onChange={handleEditChange} style={inputStyle} />
-                    </label>
-                    <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
-                      Brand
-                      <input name="brand" value={editForm.brand} onChange={handleEditChange} style={inputStyle} />
-                    </label>
-                  </div>
-                  <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
-                    Product Name
-                    <input name="name" value={editForm.name} onChange={handleEditChange} style={inputStyle} />
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
-                      Original Price
-                      <input name="originalPrice" type="number" value={editForm.originalPrice} onChange={handleEditChange} style={inputStyle} />
-                    </label>
-                    <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
-                      Sale Price
-                      <input name="salePrice" type="number" value={editForm.salePrice} onChange={handleEditChange} style={inputStyle} />
-                    </label>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
-                      Discount
-                      <input name="discount" type="number" value={editForm.discount} onChange={handleEditChange} style={inputStyle} />
-                    </label>
-                    <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
-                      Ratings
-                      <input name="ratings" type="number" step="0.1" value={editForm.ratings} onChange={handleEditChange} style={inputStyle} />
-                    </label>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
-                      Reviews
-                      <input name="reviews" type="number" value={editForm.reviews} onChange={handleEditChange} style={inputStyle} />
-                    </label>
-                    <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
-                      Rating Text
-                      <input name="ratingText" value={editForm.ratingText} onChange={handleEditChange} style={inputStyle} />
-                    </label>
-                  </div>
-                  <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
-                    Offers (comma separated)
-                    <input name="offers" value={editForm.offers} onChange={handleEditChange} style={inputStyle} />
-                  </label>
-                  <label style={{ display: 'grid', gap: '0.35rem', fontWeight: 600, color: '#111827' }}>
-                    Image URLs (comma separated)
-                    <input name="images" value={editForm.images} onChange={handleEditChange} style={inputStyle} />
-                  </label>
-                  <button type="submit" disabled={isUpdating} style={{ border: 'none', background: '#d70b5c', color: 'white', borderRadius: '999px', padding: '0.8rem 1rem', cursor: 'pointer', fontWeight: 700 }}>
-                    {isUpdating ? 'Updating...' : 'Update Product'}
-                  </button>
-                </form>
-              ) : null}
             </div>
           </div>
         </div>
@@ -488,9 +525,13 @@ function AdminPage() {
 
 const inputStyle = {
   border: '1px solid #e5e7eb',
-  borderRadius: '12px',
-  padding: '0.8rem 0.95rem',
-  fontSize: '0.95rem',
+  borderRadius: '10px',
+  padding: '0.45rem 0.65rem',
+  fontSize: '0.9rem',
+  height: '2.1rem',
+  maxHeight: '2.3rem',
+  lineHeight: 1.2,
+  boxSizing: 'border-box',
   outline: 'none',
 }
 
