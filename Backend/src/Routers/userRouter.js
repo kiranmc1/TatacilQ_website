@@ -26,6 +26,8 @@ router.patch('/admin/vendor-products/:id/approve', auth, admin, userController.a
 
 router.post('/vendor/products', auth, vendor, userController.submitVendorProduct);
 router.get('/vendor/products', auth, vendor, userController.getVendorProducts);
+router.put('/vendor/products/:id', auth, vendor, userController.updateProduct);
+router.delete('/vendor/products/:id', auth, vendor, userController.deleteProduct);
 
 router.post('/orders', auth, orderController.createOrder);
 router.get('/orders', auth, orderController.getUserOrders);

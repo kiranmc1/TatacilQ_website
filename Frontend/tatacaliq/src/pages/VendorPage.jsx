@@ -19,9 +19,12 @@ function VendorPage() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [form, setForm] = useState(initialForm)
+  const [editForm, setEditForm] = useState(initialForm)
   const [statusList, setStatusList] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitStatus, setSubmitStatus] = useState('')
+  const [editingProductId, setEditingProductId] = useState('')
+  const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
     const storedUser = window.localStorage.getItem('cliqUser')
@@ -94,6 +97,28 @@ function VendorPage() {
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleEditChange = (event) => {
+    const { name, value } = event.target
+    setEditForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const startEditingProduct = (product) => {
+    setEditingProductId(product._id || product.id)
+    setEditForm({
+      categoryName: product.categoryName || product.categoryid || '',
+      brand: product.brand || '',
+      name: product.name || '',
+      originalPrice: product.originalPrice ?? product.salePrice ?? '',
+      salePrice: product.salePrice ?? product.originalPrice ?? '',
+      discount: product.discount ?? '',
+      ratings: product.ratings ?? '',
+      reviews: product.reviews ?? '',
+      offers: Array.isArray(product.offers) ? product.offers.join(', ') : '',
+      ratingText: product.ratingText || '',
+      images: Array.isArray(product.images) ? product.images.join(', ') : '',
+    })
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     setSubmitStatus('')
@@ -138,6 +163,96 @@ function VendorPage() {
 
       setSubmitStatus('Product submitted for approval.')
       setForm(initialForm)
+      await loadVendorProducts(parsedUser.token)
+    } catch (error) {
+      setSubmitStatus(error.message)
+    }
+  }
+
+  const handleUpdateProduct = async (event) => {
+    event.preventDefault()
+    setSubmitStatus('')
+
+    const storedUser = window.localStorage.getItem('cliqUser')
+    const parsedUser = storedUser ? JSON.parse(storedUser) : null
+    if (!parsedUser?.token || !editingProductId) {
+      setSubmitStatus('Select a product to update first.')
+      return
+    }
+
+    const payload = {
+      categoryName: editForm.categoryName.trim(),
+      brand: editForm.brand.trim(),
+      name: editForm.name.trim(),
+      originalPrice: Number(editForm.originalPrice),
+      salePrice: Number(editForm.salePrice),
+      discount: Number(editForm.discount || 0),
+      ratings: Number(editForm.ratings || 0),
+      reviews: Number(editForm.reviews || 0),
+      offers: editForm.offers.split(',').map((item) => item.trim()).filter(Boolean),
+      ratingText: editForm.ratingText.trim(),
+      images: editForm.images.split(',').map((item) => item.trim()).filter(Boolean),
+    }
+
+    try {
+      setIsUpdating(true)
+      const response = await fetch(`http://127.0.0.1:2000/Users/vendor/products/${editingProductId}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${parsedUser.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      const contentType = response.headers.get('content-type') || ''
+      const data = contentType.includes('application/json') ? await response.json() : null
+      if (!response.ok) {
+        const message = data?.message || (await response.text()) || 'Unable to update product'
+        throw new Error(message)
+      }
+
+      setSubmitStatus('Product updated successfully.')
+      setEditingProductId('')
+      setEditForm(initialForm)
+      await loadVendorProducts(parsedUser.token)
+    } catch (error) {
+      setSubmitStatus(error.message)
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handleDeleteProduct = async (productId) => {
+    if (!window.confirm('Delete this product?')) {
+      return
+    }
+
+    const storedUser = window.localStorage.getItem('cliqUser')
+    const parsedUser = storedUser ? JSON.parse(storedUser) : null
+    if (!parsedUser?.token) {
+      setSubmitStatus('Please log in again.')
+      return
+    }
+
+    try {
+      const response = await fetch(`http://127.0.0.1:2000/Users/vendor/products/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${parsedUser.token}`,
+        },
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null)
+        throw new Error(data?.message || 'Unable to delete product')
+      }
+
+      setSubmitStatus('Product deleted successfully.')
+      if (editingProductId === productId) {
+        setEditingProductId('')
+        setEditForm(initialForm)
+      }
       await loadVendorProducts(parsedUser.token)
     } catch (error) {
       setSubmitStatus(error.message)
@@ -235,10 +350,79 @@ function VendorPage() {
                       <div style={{ marginTop: '0.5rem', color: '#6b7280' }}>
                         Submitted: {new Date(product.submittedAt || product.createdAt).toLocaleString()}
                       </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.8rem' }}>
+                        <button type="button" onClick={() => startEditingProduct(product)} style={{ border: 'none', background: '#2563eb', color: 'white', borderRadius: '999px', padding: '0.45rem 0.75rem', cursor: 'pointer', fontWeight: 700 }}>
+                          Edit
+                        </button>
+                        <button type="button" onClick={() => handleDeleteProduct(product._id || product.id)} style={{ border: 'none', background: '#dc2626', color: 'white', borderRadius: '999px', padding: '0.45rem 0.75rem', cursor: 'pointer', fontWeight: 700 }}>
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
+
+              {editingProductId ? (
+                <form onSubmit={handleUpdateProduct} style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
+                  <h3 style={{ margin: 0 }}>Update selected product</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <label style={labelStyle}>
+                      Category Name
+                      <input name="categoryName" value={editForm.categoryName} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                    <label style={labelStyle}>
+                      Brand
+                      <input name="brand" value={editForm.brand} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                  </div>
+                  <label style={labelStyle}>
+                    Product Name
+                    <input name="name" value={editForm.name} onChange={handleEditChange} style={inputStyle} />
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <label style={labelStyle}>
+                      Original Price
+                      <input name="originalPrice" type="number" value={editForm.originalPrice} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                    <label style={labelStyle}>
+                      Sale Price
+                      <input name="salePrice" type="number" value={editForm.salePrice} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <label style={labelStyle}>
+                      Discount
+                      <input name="discount" type="number" value={editForm.discount} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                    <label style={labelStyle}>
+                      Ratings
+                      <input name="ratings" type="number" step="0.1" value={editForm.ratings} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <label style={labelStyle}>
+                      Reviews
+                      <input name="reviews" type="number" value={editForm.reviews} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                    <label style={labelStyle}>
+                      Rating Text
+                      <input name="ratingText" value={editForm.ratingText} onChange={handleEditChange} style={inputStyle} />
+                    </label>
+                  </div>
+                  <label style={labelStyle}>
+                    Offers (comma separated)
+                    <input name="offers" value={editForm.offers} onChange={handleEditChange} style={inputStyle} />
+                  </label>
+                  <label style={labelStyle}>
+                    Image URLs (comma separated)
+                    <input name="images" value={editForm.images} onChange={handleEditChange} style={inputStyle} />
+                  </label>
+                  <button type="submit" disabled={isUpdating} style={buttonStyle}>
+                    {isUpdating ? 'Updating...' : 'Update Product'}
+                  </button>
+                </form>
+              ) : null}
             </div>
           </div>
         </div>
