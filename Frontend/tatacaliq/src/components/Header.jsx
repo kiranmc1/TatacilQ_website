@@ -38,6 +38,15 @@ function Header() {
   })
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [showLoginSuccess, setShowLoginSuccess] = useState(false)
+  const [cartCount, setCartCount] = useState(() => {
+    if (typeof window === 'undefined') return 0
+    try {
+      const existing = JSON.parse(window.localStorage.getItem('cliqCart') || '[]')
+      return Array.isArray(existing) ? existing.reduce((sum, item) => sum + (item.quantity || 1), 0) : 0
+    } catch {
+      return 0
+    }
+  })
   const [isAdminUser, setIsAdminUser] = useState(() => normalizeFlag(user?.isAdmin))
   const [isVendorUser, setIsVendorUser] = useState(() => normalizeFlag(user?.isVendor))
   const recognitionRef = useRef(null)
@@ -50,6 +59,32 @@ function Header() {
       window.localStorage.removeItem('cliqUser')
     }
   }, [user])
+
+  useEffect(() => {
+    const refreshCartCount = () => {
+      try {
+        const cart = JSON.parse(window.localStorage.getItem('cliqCart') || '[]')
+        setCartCount(Array.isArray(cart) ? cart.reduce((sum, item) => sum + (item.quantity || 1), 0) : 0)
+      } catch {
+        setCartCount(0)
+      }
+    }
+
+    refreshCartCount()
+    const handleStorage = (event) => {
+      if (event.key === 'cliqCart') {
+        refreshCartCount()
+      }
+    }
+    const handleCartUpdated = () => refreshCartCount()
+
+    window.addEventListener('storage', handleStorage)
+    window.addEventListener('cartUpdated', handleCartUpdated)
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener('cartUpdated', handleCartUpdated)
+    }
+  }, [])
 
   useEffect(() => {
     const loadCurrentUser = async () => {
@@ -308,7 +343,16 @@ function Header() {
                     <a className="nav-link text-white" href="#">CLIQ Care</a>
                   </li>
                   <li className="nav-item">
-                    <a className="nav-link text-white" href="#">Track Orders</a>
+                    <a
+                      className="nav-link text-white"
+                      href="#"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        navigate('/track-order')
+                      }}
+                    >
+                      Track Orders
+                    </a>
                   </li>
                   {isAdminUser && (
                     <li className="nav-item">
@@ -442,12 +486,13 @@ function Header() {
                   <path d='M13.73 21a2 2 0 0 1-3.46 0' />
                 </svg>
               </button>
-              <button type='button' className='header-icon-button' aria-label='Shopping Cart'>
+              <button type='button' className='header-icon-button cart-button' aria-label='Shopping Cart' onClick={() => navigate('/cart')}>
                 <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
                   <path d='M6 6h15l-1.5 9h-13z' />
                   <circle cx='9' cy='20' r='1' />
                   <circle cx='18' cy='20' r='1' />
                 </svg>
+                {cartCount > 0 && <span className='cart-badge'>{cartCount}</span>}
               </button>
             </div>
           </div>

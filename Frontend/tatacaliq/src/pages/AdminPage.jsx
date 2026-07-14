@@ -46,7 +46,7 @@ function AdminPage() {
         try {
           const response = await fetch('http://127.0.0.1:2000/Users/me', {
             headers: {
-              Authorization: `Bearer ${parsedUser.token}`,
+              Authorization: `]Bearer ${parsedUser.token}`,
             },
           })
 

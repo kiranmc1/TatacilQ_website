@@ -34,6 +34,10 @@ exports.createOrder = async (orderData) => {
     const orderNumber = createOrderNumber();
     const pricing = buildPricing(orderData.items, orderData.shippingCharge);
 
+    const expectedDate = new Date()
+    expectedDate.setDate(expectedDate.getDate() + 7)
+    const trackingId = `TCLQ${Date.now().toString().slice(-6)}`
+
     const orderPayload = {
         userId: orderData.userId,
         orderNumber,
@@ -49,9 +53,10 @@ exports.createOrder = async (orderData) => {
             tier: 'Bronze'
         },
         delivery: {
-            expectedDate: null,
-            carrier: null,
-            trackingId: null
+            expectedDate: expectedDate.toISOString().split('T')[0],
+            carrier: 'Tata CLiQ Logistics',
+            trackingId,
+            status: 'processing'
         }
     };
 
@@ -85,11 +90,54 @@ exports.trackOrder = async (orderId, userId) => {
         throw new Error('Order not found');
     }
 
+    const currentStatus = order.delivery?.status || order.status || 'processing';
+    const isCancelled = order.status === 'cancelled';
+
+    const statusSteps = isCancelled ? [
+        {
+            id: 'cancelled',
+            title: 'Order Cancelled',
+            description: 'This order has been cancelled and will not be shipped.',
+            completed: true,
+            icon: '❌'
+        }
+    ] : [
+        {
+            id: 'processing',
+            title: 'Order Confirmed',
+            description: 'Your order has been received and is being prepared.',
+            completed: true,
+            icon: '✅'
+        },
+        {
+            id: 'shipped',
+            title: 'Shipped',
+            description: 'Your package has left the warehouse.',
+            completed: ['shipped', 'out-for-delivery', 'delivered'].includes(currentStatus),
+            icon: '📦'
+        },
+        {
+            id: 'out-for-delivery',
+            title: 'Out for Delivery',
+            description: 'Your package is on the way to your address.',
+            completed: ['out-for-delivery', 'delivered'].includes(currentStatus),
+            icon: '🚚'
+        },
+        {
+            id: 'delivered',
+            title: 'Delivered',
+            description: 'Your order has been delivered successfully.',
+            completed: currentStatus === 'delivered',
+            icon: '🏠'
+        }
+    ];
+
     return {
         orderId: order.id,
-        status: order.status,
+        status: currentStatus,
         delivery: order.delivery,
         orderNumber: order.orderNumber,
-        estimatedDelivery: order.delivery.expectedDate
+        estimatedDelivery: order.delivery?.expectedDate,
+        shipmentSteps: statusSteps
     };
 };

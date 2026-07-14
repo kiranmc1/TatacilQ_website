@@ -9,6 +9,10 @@ import ProductDetail from './components/ProductDetail'
 import AdminPage from './pages/AdminPage'
 import VendorPage from './pages/VendorPage'
 import AdminVendorApprovalPage from './pages/AdminVendorApprovalPage'
+import CheckoutPage from './pages/CheckoutPage'
+import PaymentSuccess from './pages/PaymentSuccess'
+import OrderTrackerPage from './pages/OrderTrackerPage'
+import CartPage from './pages/CartPage'
 
 function App() {
   return (
@@ -24,6 +28,11 @@ function App() {
         } />
         <Route path="/category/:categoryId" element={<CategoryPage />} />
         <Route path="/product/:productId" element={<ProductDetail />} />
+        <Route path="/checkout/:productId" element={<CheckoutPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/track-order" element={<OrderTrackerPage />} />
+        <Route path="/cart" element={<CartPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/admin/approvals" element={<AdminVendorApprovalPage />} />
         <Route path="/vendor" element={<VendorPage />} />

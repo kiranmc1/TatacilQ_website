@@ -260,6 +260,87 @@
   color: #1a73e8;
 }
 
+.product-detail-buy-info,
+.product-detail-attributes-panel {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+
+.product-detail-buy-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 14px;
+  color: #333;
+}
+
+.product-detail-buy-row:last-child {
+  border-bottom: none;
+}
+
+.buy-info-label {
+  display: block;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.buy-info-value {
+  display: block;
+  font-weight: 700;
+  color: #111827;
+}
+
+.change-pincode-btn,
+.know-more-btn {
+  border: none;
+  background: none;
+  color: #e6004c;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.product-detail-sold-by {
+  margin-top: 12px;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.product-detail-attributes-heading {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 14px;
+}
+
+.product-detail-attribute-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.product-detail-attribute-row:last-child {
+  border-bottom: none;
+}
+
+.attribute-label {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.attribute-value {
+  font-weight: 700;
+  color: #111827;
+}
+
 .product-detail-actions {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

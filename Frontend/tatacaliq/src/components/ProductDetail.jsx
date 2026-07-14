@@ -8,6 +8,39 @@ function ProductDetail() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [selectedSize, setSelectedSize] = useState('M')
   const [loading, setLoading] = useState(true)
+  const [cartMessage, setCartMessage] = useState('')
+
+  const handleAddToCart = () => {
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      brand: product.brand,
+      price: product.salePrice,
+      quantity: 1,
+      image: product.image || product.images?.[0],
+    }
+
+    try {
+      const existingCart = JSON.parse(window.localStorage.getItem('cliqCart') || '[]')
+      const updatedCart = Array.isArray(existingCart) ? [...existingCart] : []
+      const existingIndex = updatedCart.findIndex((item) => item.id === cartItem.id)
+
+      if (existingIndex >= 0) {
+        updatedCart[existingIndex].quantity = (updatedCart[existingIndex].quantity || 1) + 1
+      } else {
+        updatedCart.push(cartItem)
+      }
+
+      window.localStorage.setItem('cliqCart', JSON.stringify(updatedCart))
+      window.dispatchEvent(new Event('cartUpdated'))
+      setCartMessage(`${product.name} added to cart.`)
+      setTimeout(() => setCartMessage(''), 3000)
+    } catch (error) {
+      console.error('Unable to add item to cart', error)
+      setCartMessage('Unable to add to cart. Please try again.')
+      setTimeout(() => setCartMessage(''), 3000)
+    }
+  }
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -145,6 +178,37 @@ function ProductDetail() {
             ))}
           </div>
 
+          <div className="product-detail-buy-info">
+            <div className="product-detail-buy-row">
+              <div>
+                <span className="buy-info-label">Ship To</span>
+                <span className="buy-info-value">110001, Delhi</span>
+              </div>
+              <button type="button" className="change-pincode-btn">Change Pincode</button>
+            </div>
+            <div className="product-detail-buy-row">
+              <span>Delivery by 11th Jul</span>
+              <span>Cash on Delivery <strong>Available</strong></span>
+            </div>
+            <div className="product-detail-buy-row">
+              <span>7 Days Easy Return</span>
+              <button type="button" className="know-more-btn">Know More</button>
+            </div>
+            <div className="product-detail-sold-by">Sold By {product.soldBy || 'Levi Strauss India PVT LTD'}</div>
+          </div>
+
+          <div className="product-detail-attributes-panel">
+            <div className="product-detail-attributes-heading">Product Details</div>
+            <div className="product-detail-attribute-row">
+              <span className="attribute-label">Fit</span>
+              <span className="attribute-value">{product.fit || 'Slim'}</span>
+            </div>
+            <div className="product-detail-attribute-row">
+              <span className="attribute-label">Pattern</span>
+              <span className="attribute-value">{product.pattern || 'Solid'}</span>
+            </div>
+          </div>
+
           <div className="product-detail-actions">
             <button type="button" className="icon-action-btn" title="Share">
               ↗
@@ -152,9 +216,14 @@ function ProductDetail() {
             <button type="button" className="icon-action-btn" title="Wishlist">
               ♡
             </button>
-            <button type="button" className="primary-action-btn">Buy Now</button>
-            <button type="button" className="secondary-action-btn">Add To Bag</button>
+            <Link to={`/checkout/${product.id}`} className="primary-action-btn product-buy-link">
+              Buy Now
+            </Link>
+            <button type="button" className="secondary-action-btn" onClick={handleAddToCart}>
+              Add To Bag
+            </button>
           </div>
+          {cartMessage && <div className="product-detail-cart-message">{cartMessage}</div>}
         </section>
       </div>
     </div>

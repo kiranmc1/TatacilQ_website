@@ -255,6 +255,16 @@ function CategoryPage() {
                         <span className="sale-price">₹{product.salePrice}</span>
                         <span className="original-price">₹{product.originalPrice}</span>
                       </div>
+                      <button
+                        type="button"
+                        className="product-buy-now-btn"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          navigate(`/product/${product.id}`)
+                        }}
+                      >
+                        Buy Now
+                      </button>
                     </div>
                   </div>
                 )

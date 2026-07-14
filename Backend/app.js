@@ -1,10 +1,12 @@
 require('dotenv').config();
 const express = require('express');
+const paymentController = require('./src/controllers/paymentController');
 
 const app = express();
 
 const UseRoutes = require('./src/Routers/userRouter');
 
+app.post('/Users/payments/webhook', express.raw({ type: 'application/json' }), paymentController.handleWebhook);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
