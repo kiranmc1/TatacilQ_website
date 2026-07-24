@@ -102,7 +102,8 @@ function CategoryPage() {
         <div className="active-filters-row">
           <div className="active-filters-container">
             {selectedFilters.discount.map((range, idx) => {
-              const label = discountRanges.find((d) => d.range === range)?.label
+              const labelObj = discountRanges.find((d) => Array.isArray(d.range) && Array.isArray(range) && d.range[0] === range[0] && d.range[1] === range[1])
+              const label = labelObj ? labelObj.label : `${range[0]}% - ${range[1]}%`
               return (
                 <span key={idx} className="filter-badge">
                   {label}

@@ -310,11 +310,11 @@ function Header() {
   return (
     <>
       <div className='logo-handler'>
-        <div className='logo'></div>
+       
         <div className='Header-nav'>
           <nav className="navbar navbar-expand-lg navbar-light bg-black">
             <div className="container-fluid">
-              <a className="navbar-brand text-white" href="#">Tata CLiQ Luxury</a>
+               <div className='logo'></div>
               <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
               </button>
@@ -340,7 +340,10 @@ function Header() {
                     <a className="nav-link text-white" href="#">Gift Card</a>
                   </li>
                   <li className="nav-item">
-                    <a className="nav-link text-white" href="#">CLIQ Care</a>
+                    <a className="nav-link text-white" href="#"  onClick={(event) => {
+                        event.preventDefault()
+                        navigate('/care')
+                      }}>CLIQ Care</a>
                   </li>
                   <li className="nav-item">
                     <a

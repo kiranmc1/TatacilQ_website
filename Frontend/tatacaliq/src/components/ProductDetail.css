@@ -5,7 +5,9 @@
   color: #1f1f1f;
   background-color: #f5f5f5;
 }
-
+.product-buy-link{
+  text-decoration: none;
+}
 .product-detail-breadcrumbs {
   display: flex;
   flex-wrap: wrap;

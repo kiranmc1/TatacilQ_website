@@ -93,13 +93,29 @@ function ProductDetail() {
   return (
     <div className="product-detail-page">
       <div className="product-detail-breadcrumbs">
-        <Link to="/">Home</Link>
-        <span>›</span>
-        <Link to="/category/mens-clothing">Men's Clothing</Link>
-        <span>›</span>
-        <Link to="/category/mens-clothing">Casual Wear</Link>
-        <span>›</span>
-        <span>{product.name}</span>
+        {(() => {
+          const crumbs = []
+          crumbs.push({ label: 'Home', to: '/' })
+
+          // prefer array paths (categoryPath, breadcrumbs), fall back to single category
+          const pathArray = product.categoryPath || product.breadcrumbs || null
+          if (Array.isArray(pathArray) && pathArray.length) {
+            pathArray.forEach((p) => {
+              crumbs.push({ label: p, to: `/category/${encodeURIComponent(String(p).toLowerCase().replace(/\s+/g, '-'))}` })
+            })
+          } else if (product.category) {
+            crumbs.push({ label: product.category, to: `/category/${encodeURIComponent(String(product.category).toLowerCase().replace(/\s+/g, '-'))}` })
+          }
+
+          crumbs.push({ label: product.name })
+
+          return crumbs.map((c, i) => (
+            <span key={i}>
+              {c.to ? <Link to={c.to}>{c.label}</Link> : <span>{c.label}</span>}
+              {i < crumbs.length - 1 && <span>›</span>}
+            </span>
+          ))
+        })()}
       </div>
 
       <div className="product-detail-grid">

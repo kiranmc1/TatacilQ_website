@@ -21,9 +21,13 @@ function AdminPage() {
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [form, setForm] = useState(initialForm)
+  const [categoryForm, setCategoryForm] = useState({ name: '', imageUrl: '' })
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false)
   const [editForm, setEditForm] = useState(initialForm)
   const [selectedProductId, setSelectedProductId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const productsPerPage = 5
   const [isUpdating, setIsUpdating] = useState(false)
   const [feedback, setFeedback] = useState({ type: '', message: '' })
   const editSectionRef = useRef(null)
@@ -46,7 +50,7 @@ function AdminPage() {
         try {
           const response = await fetch('http://127.0.0.1:2000/Users/me', {
             headers: {
-              Authorization: `]Bearer ${parsedUser.token}`,
+              Authorization: `Bearer ${parsedUser.token}`,
             },
           })
 
@@ -114,6 +118,54 @@ function AdminPage() {
   const handleChange = (event) => {
     const { name, value } = event.target
     setForm((current) => ({ ...current, [name]: value }))
+  }
+
+  const handleCategoryChange = (event) => {
+    const { name, value } = event.target
+    setCategoryForm((current) => ({ ...current, [name]: value }))
+  }
+
+  const handleCreateCategory = async (event) => {
+    event.preventDefault()
+    setFeedback({ type: '', message: '' })
+
+    const trimmedName = categoryForm.name.trim()
+    if (!trimmedName) {
+      setFeedback({ type: 'error', message: 'Please enter a category name.' })
+      return
+    }
+
+    try {
+      setIsCreatingCategory(true)
+      const response = await fetch('http://127.0.0.1:2000/Users/admin/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user?.token}`,
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          imageUrl: categoryForm.imageUrl.trim() || undefined,
+        }),
+      })
+
+      const data = await response.json().catch(() => null)
+      if (!response.ok) {
+        throw new Error(data?.message || 'Unable to create category')
+      }
+
+      setFeedback({ type: 'success', message: `Category "${data?.name || trimmedName}" created successfully.` })
+      setCategoryForm({ name: '', imageUrl: '' })
+      const responseCategories = await fetch('http://127.0.0.1:2000/Users/categories')
+      if (responseCategories.ok) {
+        const refreshedCategories = await responseCategories.json()
+        setCategories(Array.isArray(refreshedCategories) ? refreshedCategories : [])
+      }
+    } catch (error) {
+      setFeedback({ type: 'error', message: error.message || 'Unable to create category' })
+    } finally {
+      setIsCreatingCategory(false)
+    }
   }
 
   const handleSubmit = async (event) => {
@@ -285,15 +337,43 @@ function AdminPage() {
     }
   }
 
+  const pageCount = Math.max(1, Math.ceil(products.length / productsPerPage))
+  const currentProducts = products.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage)
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > pageCount) return
+    setCurrentPage(page)
+  }
+
+  const paginationButtonStyle = (active) => ({
+    border: '1px solid #d1d5db',
+    background: active ? '#2563eb' : 'white',
+    color: active ? 'white' : '#111827',
+    borderRadius: '999px',
+    padding: '0.45rem 0.8rem',
+    cursor: active ? 'default' : 'pointer',
+    minWidth: '48px',
+    fontWeight: 600,
+  })
+
   return (
-    <div style={{ padding: '2rem', minHeight: '70vh', background: '#f8fafc' }}>
+    <>
+      <style>{`
+        .admin-page label {
+          font-size: 0.9rem !important;
+          font-weight: 600 !important;
+          color: #111827 !important;
+          line-height: 1.3 !important;
+        }
+      `}</style>
+      <div className="admin-page" style={{ padding: '10px ', minHeight: '0', background: '#f8fafc' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto', background: 'white', borderRadius: '24px', padding: '2rem', boxShadow: '0 20px 50px rgba(0,0,0,0.08)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
           <div>
             <p style={{ color: '#d70b5c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '0.35rem' }}>Protected Portal</p>
             <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Admin Dashboard</h1>
             <p style={{ color: '#4b5563', margin: 0 }}>
-              Add a product and the backend will resolve the matching category ID from the Categories collection before saving it.
+              Create categories and products here. New categories are saved to the MongoDB Categories collection and products are linked to them.
             </p>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -309,8 +389,39 @@ function AdminPage() {
           </div>
         ) : null}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '1.5rem' }}>
-          <form onSubmit={handleSubmit}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '10px', alignItems: 'start' }}>
+          <div style={{ display: 'grid', gap: '0.5rem' }}>
+            <form onSubmit={handleCreateCategory} style={{ background: '#f8fafc', borderRadius: '18px', padding: '0.9rem', border: '1px solid #e5e7eb', display: 'grid', gap: '0.5rem', alignSelf: 'start', maxWidth: '520px' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>Create a category</h3>
+              <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                Category Name
+                <input name="name" value={categoryForm.name} onChange={handleCategoryChange} placeholder="e.g. Men" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
+              </label>
+              <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
+                Category Image URL (optional)
+                <input name="imageUrl" value={categoryForm.imageUrl} onChange={handleCategoryChange} placeholder="https://example.com/category.jpg" style={{ ...inputStyle, minHeight: '2.1rem', lineHeight: 1.2 }} />
+              </label>
+              <button
+                type="submit"
+                disabled={isCreatingCategory}
+                style={{
+                  border: 'none',
+                  background: '#047857',
+                  color: 'white',
+                  borderRadius: '999px',
+                  padding: '0.6rem 0.9rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  width: 'fit-content',
+                  alignSelf: 'start',
+                }}
+              >
+                {isCreatingCategory ? 'Creating category...' : 'Create Category'}
+              </button>
+            </form>
+
+            <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <label style={{ display: 'grid', gap: '0.15rem', fontWeight: 600, color: '#111827' }}>
                 Category Name
@@ -388,7 +499,8 @@ function AdminPage() {
             >
               {isSubmitting ? 'Saving product...' : 'Add Product'}
             </button>
-          </form>
+            </form>
+          </div>
 
           <div style={{ display: 'grid', gap: '1rem' }}>
             <div style={{ background: '#f8fafc', borderRadius: '18px', padding: '1.25rem', border: '1px solid #e5e7eb' }}>
@@ -492,26 +604,60 @@ function AdminPage() {
               ) : null}
 
               {products.length > 0 ? (
-                <div style={{ display: 'grid', gap: '0.7rem' }}>
-                  {products.map((product) => (
-                    <div key={product._id || product.id} style={{ background: 'white', borderRadius: '14px', padding: '0.9rem', border: '1px solid #e5e7eb' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
-                        <div>
-                          <strong>{product.name}</strong>
-                          <div style={{ color: '#6b7280', fontSize: '0.9rem', marginTop: '0.25rem' }}>{product.brand}</div>
-                        </div>
-                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                          <button type="button" onClick={() => startEditingProduct(product)} style={{ border: 'none', background: '#2563eb', color: 'white', borderRadius: '999px', padding: '0.45rem 0.75rem', cursor: 'pointer', fontWeight: 700 }}>
-                            Edit
-                          </button>
-                          <button type="button" onClick={() => handleDeleteProduct(product._id || product.id)} style={{ border: 'none', background: '#dc2626', color: 'white', borderRadius: '999px', padding: '0.45rem 0.75rem', cursor: 'pointer', fontWeight: 700 }}>
-                            Delete
-                          </button>
+                <>
+                  <div style={{ display: 'grid', gap: '0.7rem' }}>
+                    {currentProducts.map((product) => (
+                      <div key={product._id || product.id} style={{ background: 'white', borderRadius: '14px', padding: '0.9rem', border: '1px solid #e5e7eb' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+                          <div>
+                            <strong>{product.name}</strong>
+                            <div style={{ color: '#6b7280', fontSize: '0.9rem', marginTop: '0.25rem' }}>{product.brand}</div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <button type="button" onClick={() => startEditingProduct(product)} style={{ border: 'none', background: '#2563eb', color: 'white', borderRadius: '999px', padding: '0.45rem 0.75rem', cursor: 'pointer', fontWeight: 700 }}>
+                              Edit
+                            </button>
+                            <button type="button" onClick={() => handleDeleteProduct(product._id || product.id)} style={{ border: 'none', background: '#dc2626', color: 'white', borderRadius: '999px', padding: '0.45rem 0.75rem', cursor: 'pointer', fontWeight: 700 }}>
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1rem' }}>
+                    <span style={{ color: '#4b5563' }}>Showing {currentProducts.length} of {products.length} products</span>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        style={paginationButtonStyle(currentPage === 1)}
+                      >
+                        Previous
+                      </button>
+                      {Array.from({ length: pageCount }, (_, idx) => (
+                        <button
+                          key={idx + 1}
+                          type="button"
+                          onClick={() => handlePageChange(idx + 1)}
+                          style={paginationButtonStyle(currentPage === idx + 1)}
+                        >
+                          {idx + 1}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === pageCount}
+                        style={paginationButtonStyle(currentPage === pageCount)}
+                      >
+                        Next
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                </>
               ) : (
                 <p style={{ color: '#6b7280', margin: 0 }}>No products available yet.</p>
               )}
@@ -519,7 +665,8 @@ function AdminPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 

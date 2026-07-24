@@ -13,6 +13,7 @@ import CheckoutPage from './pages/CheckoutPage'
 import PaymentSuccess from './pages/PaymentSuccess'
 import OrderTrackerPage from './pages/OrderTrackerPage'
 import CartPage from './pages/CartPage'
+import Care from './pages/Care'
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/admin/approvals" element={<AdminVendorApprovalPage />} />
         <Route path="/vendor" element={<VendorPage />} />
+        <Route path="/care" element={<Care />} />
       </Routes>
     </div>
   )
