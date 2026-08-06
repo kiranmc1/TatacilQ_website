@@ -1,7 +1,11 @@
 const { MongoClient } = require('mongodb');
 
-const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017';
-const dbName = process.env.MONGODB_DB || 'TatacaliQ';
+const uri = process.env.MONGODB_URI;
+const dbName = process.env.MONGODB_DB;
+
+if (!uri || !dbName) {
+  throw new Error('Missing MongoDB configuration in environment variables');
+}
 
 let client;
 let db;

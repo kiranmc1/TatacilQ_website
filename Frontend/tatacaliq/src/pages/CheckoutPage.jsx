@@ -18,7 +18,7 @@ function CheckoutPage() {
       try {
         setLoading(true)
         if (productId) {
-          const response = await fetch(`http://localhost:2000/Users/products/${productId}`)
+          const response = await fetch(apiUrl(`/Users/products/${productId}`))
           if (!response.ok) {
             throw new Error('Failed to load product')
           }
@@ -94,7 +94,7 @@ function CheckoutPage() {
       }
 
       if (paymentMethod === 'Stripe') {
-        const response = await fetch('http://localhost:2000/Users/payments/create-checkout-session', {
+        const response = await fetch(apiUrl('/Users/payments/create-checkout-session'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ function CheckoutPage() {
         offerSummary: [],
       }
 
-      const response = await fetch('http://localhost:2000/Users/orders', {
+      const response = await fetch(apiUrl('/Users/orders'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

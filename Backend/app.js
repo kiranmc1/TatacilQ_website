@@ -5,6 +5,10 @@ const paymentController = require('./src/controllers/paymentController');
 const app = express();
 
 const UseRoutes = require('./src/Routers/userRouter');
+const allowedOrigins = [process.env.FRONTEND_URL, ...(process.env.CORS_ALLOWED_ORIGINS || '')]
+  .split(',')
+  .map((origin) => origin && origin.trim())
+  .filter(Boolean);
 
 app.post('/Users/payments/webhook', express.raw({ type: 'application/json' }), paymentController.handleWebhook);
 app.use(express.json());
@@ -13,7 +17,6 @@ app.use(express.urlencoded({ extended: true }));
 // CORS middleware to allow requests from frontend during development
 app.use((req, res, next) => {
    const origin = req.headers.origin;
-   const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
 
    if (origin && allowedOrigins.includes(origin)) {
       res.header('Access-Control-Allow-Origin', origin);
@@ -37,9 +40,8 @@ app.get("/",(req,res)=>{
 
 app.use('/Users',UseRoutes)
 
-
-
-app.listen(2000,()=>{
-   console.log("app is running")
+const port = Number(process.env.PORT) || 2000;
+app.listen(port,()=>{
+   console.log(`app is running on port ${port}`)
 })
 

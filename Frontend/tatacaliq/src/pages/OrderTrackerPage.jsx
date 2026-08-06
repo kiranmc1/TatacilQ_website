@@ -41,7 +41,7 @@ function OrderTrackerPage() {
     setTracking(null)
 
     try {
-      const response = await fetch(`http://localhost:2000/Users/orders/${orderId}/track`, {
+      const response = await fetch(apiUrl(`/Users/orders/${orderId}/track`), {
         headers: {
           Authorization: `Bearer ${token}`,
         },

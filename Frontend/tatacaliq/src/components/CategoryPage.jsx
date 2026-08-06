@@ -19,7 +19,7 @@ function CategoryPage() {
       try {
         setLoading(true)
         const query = categoryId ? `?categoryId=${encodeURIComponent(categoryId)}` : ''
-        const response = await fetch(`http://localhost:2000/Users/products${query}`)
+        const response = await fetch(apiUrl(`/Users/products${query}`))
         const data = await response.json()
         setProducts(Array.isArray(data) ? data : [])
       } catch (error) {

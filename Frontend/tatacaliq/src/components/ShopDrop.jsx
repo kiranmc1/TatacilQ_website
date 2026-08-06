@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { apiUrl } from '../utils/api'
 import './ShopDrop.css'
 
 
@@ -13,7 +14,7 @@ function ShopDrop() {
 
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:2000/Users/categories')
+        const response = await fetch(apiUrl('/Users/categories'))
         if (!response.ok) {
           throw new Error(`Server responded with ${response.status}`)
         }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { apiUrl } from '../utils/api'
 import './ProductDetail.css'
 
 function ProductDetail() {
@@ -46,7 +47,7 @@ function ProductDetail() {
     const loadProduct = async () => {
       try {
         setLoading(true)
-        const response = await fetch(`http://localhost:2000/Users/products/${productId}`)
+        const response = await fetch(apiUrl(`/Users/products/${productId}`))
         const data = await response.json()
         setProduct(data)
       } catch (error) {

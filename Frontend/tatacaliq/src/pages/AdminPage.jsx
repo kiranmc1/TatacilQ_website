@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { apiUrl } from '../utils/api'
 
 const initialForm = {
   categoryName: '',
@@ -48,7 +49,7 @@ function AdminPage() {
 
       const verifyAccess = async () => {
         try {
-          const response = await fetch('http://127.0.0.1:2000/Users/me', {
+          const response = await fetch(apiUrl('/Users/me'), {
             headers: {
               Authorization: `Bearer ${parsedUser.token}`,
             },
@@ -87,7 +88,7 @@ function AdminPage() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:2000/Users/categories')
+        const response = await fetch(apiUrl('/Users/categories'))
         if (!response.ok) {
           throw new Error('Unable to fetch categories')
         }
@@ -100,7 +101,7 @@ function AdminPage() {
 
     const loadProducts = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:2000/Users/products')
+        const response = await fetch(apiUrl('/Users/products'))
         if (!response.ok) {
           throw new Error('Unable to fetch products')
         }
@@ -137,7 +138,7 @@ function AdminPage() {
 
     try {
       setIsCreatingCategory(true)
-      const response = await fetch('http://127.0.0.1:2000/Users/admin/categories', {
+      const response = await fetch(apiUrl('/Users/admin/categories'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +157,7 @@ function AdminPage() {
 
       setFeedback({ type: 'success', message: `Category "${data?.name || trimmedName}" created successfully.` })
       setCategoryForm({ name: '', imageUrl: '' })
-      const responseCategories = await fetch('http://127.0.0.1:2000/Users/categories')
+      const responseCategories = await fetch(apiUrl('/Users/categories'))
       if (responseCategories.ok) {
         const refreshedCategories = await responseCategories.json()
         setCategories(Array.isArray(refreshedCategories) ? refreshedCategories : [])
@@ -199,7 +200,7 @@ function AdminPage() {
 
     try {
       setIsSubmitting(true)
-      const response = await fetch('http://127.0.0.1:2000/Users/admin/products', {
+      const response = await fetch(apiUrl('/Users/admin/products'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -215,7 +216,7 @@ function AdminPage() {
 
       setFeedback({ type: 'success', message: 'Product added successfully to the Products collection.' })
       setForm(initialForm)
-      const responseProducts = await fetch('http://127.0.0.1:2000/Users/products')
+      const responseProducts = await fetch(apiUrl('/Users/products'))
       if (responseProducts.ok) {
         const refreshedProducts = await responseProducts.json()
         setProducts(Array.isArray(refreshedProducts) ? refreshedProducts : [])
@@ -275,7 +276,7 @@ function AdminPage() {
 
     try {
       setIsUpdating(true)
-      const response = await fetch(`http://127.0.0.1:2000/Users/admin/products/${selectedProductId}`, {
+      const response = await fetch(apiUrl(`/Users/admin/products/${selectedProductId}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -292,7 +293,7 @@ function AdminPage() {
       setFeedback({ type: 'success', message: 'Product updated successfully.' })
       setSelectedProductId('')
       setEditForm(initialForm)
-      const responseProducts = await fetch('http://127.0.0.1:2000/Users/products')
+      const responseProducts = await fetch(apiUrl('/Users/products'))
       if (responseProducts.ok) {
         const refreshedProducts = await responseProducts.json()
         setProducts(Array.isArray(refreshedProducts) ? refreshedProducts : [])
@@ -310,7 +311,7 @@ function AdminPage() {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:2000/Users/admin/products/${productId}`, {
+      const response = await fetch(apiUrl(`/Users/admin/products/${productId}`), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${user?.token}`,
@@ -327,7 +328,7 @@ function AdminPage() {
         setSelectedProductId('')
         setEditForm(initialForm)
       }
-      const responseProducts = await fetch('http://127.0.0.1:2000/Users/products')
+      const responseProducts = await fetch(apiUrl('/Users/products'))
       if (responseProducts.ok) {
         const refreshedProducts = await responseProducts.json()
         setProducts(Array.isArray(refreshedProducts) ? refreshedProducts : [])

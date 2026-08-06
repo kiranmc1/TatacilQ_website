@@ -15,7 +15,7 @@ function AdminVendorApprovalPage() {
           return
         }
 
-        const response = await fetch('http://127.0.0.1:2000/Users/admin/vendor-products', {
+        const response = await fetch(apiUrl('/Users/admin/vendor-products'), {
           headers: {
             Authorization: `Bearer ${parsedUser.token}`,
           },
@@ -49,7 +49,7 @@ function AdminVendorApprovalPage() {
         return
       }
 
-      const response = await fetch(`http://127.0.0.1:2000/Users/admin/vendor-products/${productId}/approve`, {
+      const response = await fetch(apiUrl(`/Users/admin/vendor-products/${productId}/approve`), {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${parsedUser.token}`,

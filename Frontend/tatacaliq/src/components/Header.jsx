@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import './Header.css'
 import CategoryDropdown from './CategoryDropdown'
 import BrandsDropdown from './BrandsDropdown'
+import { apiUrl } from '../utils/api'
 
 const normalizeFlag = (value) => {
   if (typeof value === 'boolean') return value
@@ -98,7 +99,7 @@ function Header() {
       setIsVendorUser(normalizeFlag(user?.isVendor))
 
       try {
-        const response = await fetch('http://127.0.0.1:2000/Users/me', {
+        const response = await fetch(apiUrl('/Users/me'), {
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -202,7 +203,7 @@ function Header() {
         [authMethod === 'mobile' ? 'phone' : 'email']: authValue,
       }
 
-      const response = await fetch('http://127.0.0.1:2000/Users/send-otp', {
+      const response = await fetch(apiUrl('/Users/send-otp'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -233,7 +234,7 @@ function Header() {
         code: otpCode,
       }
 
-      const response = await fetch('http://127.0.0.1:2000/Users/verify-otp', {
+      const response = await fetch(apiUrl('/Users/verify-otp'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

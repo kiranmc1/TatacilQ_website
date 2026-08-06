@@ -14,7 +14,7 @@ function PaymentSuccess() {
 
     const fetchSession = async () => {
       try {
-        const response = await fetch(`http://localhost:2000/Users/payments/checkout-session/${sessionId}`)
+        const response = await fetch(apiUrl(`/Users/payments/checkout-session/${sessionId}`))
         if (!response.ok) {
           throw new Error('Unable to retrieve payment details')
         }

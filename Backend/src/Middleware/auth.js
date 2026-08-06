@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 
-const secret = process.env.JWT_SECRET || 'secret';
+const secret = process.env.JWT_SECRET;
+
+if (!secret) {
+    throw new Error('JWT_SECRET is not configured');
+}
 
 module.exports = (req, res, next) => {
     try {

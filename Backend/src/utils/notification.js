@@ -5,25 +5,14 @@ const { format } = require('util');
 require('dotenv').config();
 
 const emailPort = Number(process.env.SMTP_PORT) || 587;
-let emailSecure = emailPort === 465;
-
-if (typeof process.env.SMTP_SECURE !== 'undefined') {
-  const envSecure = process.env.SMTP_SECURE === 'true';
-  if (emailPort === 465) {
-    emailSecure = envSecure;
-  } else if (emailPort === 587 && envSecure) {
-    console.warn('SMTP_SECURE=true is invalid for port 587; using secure=false with STARTTLS.');
-    emailSecure = false;
-  } else {
-    emailSecure = envSecure;
-  }
-}
+const emailSecure = typeof process.env.SMTP_SECURE !== 'undefined'
+  ? process.env.SMTP_SECURE === 'true'
+  : emailPort === 465;
 
 const emailConfig = {
   host: process.env.SMTP_HOST,
   port: emailPort,
   secure: emailSecure,
-  requireTLS: emailPort === 587,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,

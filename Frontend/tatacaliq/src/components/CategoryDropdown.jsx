@@ -12,7 +12,7 @@ function CategoryDropdown() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:2000/Users/categories')
+        const response = await fetch(apiUrl('/Users/categories'))
         if (response.ok) {
           const data = await response.json()
           setCategories(data)
@@ -30,7 +30,7 @@ function CategoryDropdown() {
     setSelectedCategory(category)
 
     try {
-      const response = await fetch(`http://127.0.0.1:2000/Users/products?categoryId=${category.id}`)
+      const response = await fetch(apiUrl(`/Users/products?categoryId=${category.id}`))
       if (response.ok) {
         const data = await response.json()
         setCategoryProducts(data)

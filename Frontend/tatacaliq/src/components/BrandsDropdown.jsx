@@ -12,7 +12,7 @@ function BrandsDropdown() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:2000/Users/brands')
+        const response = await fetch(apiUrl('/Users/brands'))
         if (response.ok) {
           const data = await response.json()
           setBrands(data)
@@ -30,7 +30,7 @@ function BrandsDropdown() {
     setSelectedBrand(brand)
 
     try {
-      const response = await fetch(`http://127.0.0.1:2000/Users/products?brand=${brand.name}`)
+      const response = await fetch(apiUrl(`/Users/products?brand=${brand.name}`))
       if (response.ok) {
         const data = await response.json()
         setBrandProducts(data)

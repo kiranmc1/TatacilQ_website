@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { apiUrl } from '../utils/api'
 
 const initialForm = {
   categoryName: '',
@@ -42,7 +43,7 @@ function VendorPage() {
 
       const verifyAccess = async () => {
         try {
-          const response = await fetch('http://127.0.0.1:2000/Users/me', {
+          const response = await fetch(apiUrl('/Users/me'), {
             headers: {
               Authorization: `Bearer ${parsedUser.token}`,
             },
@@ -75,7 +76,7 @@ function VendorPage() {
 
   const loadVendorProducts = async (token) => {
     try {
-      const response = await fetch('http://127.0.0.1:2000/Users/vendor/products', {
+      const response = await fetch(apiUrl('/Users/vendor/products'), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -145,7 +146,7 @@ function VendorPage() {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:2000/Users/vendor/products', {
+      const response = await fetch(apiUrl('/Users/vendor/products'), {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${parsedUser.token}`,
@@ -196,7 +197,7 @@ function VendorPage() {
 
     try {
       setIsUpdating(true)
-      const response = await fetch(`http://127.0.0.1:2000/Users/vendor/products/${editingProductId}`, {
+      const response = await fetch(apiUrl(`/Users/vendor/products/${editingProductId}`), {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${parsedUser.token}`,
@@ -236,7 +237,7 @@ function VendorPage() {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:2000/Users/vendor/products/${productId}`, {
+      const response = await fetch(apiUrl(`/Users/vendor/products/${productId}`), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${parsedUser.token}`,

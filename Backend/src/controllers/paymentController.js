@@ -35,7 +35,10 @@ exports.createCheckoutSession = async (req, res) => {
       return res.status(400).json({ message: 'productId or items are required' });
     }
 
-    const domain = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const domain = process.env.FRONTEND_URL;
+    if (!domain) {
+      return res.status(500).json({ message: 'FRONTEND_URL is not configured' });
+    }
     const lineItems = cartItems.map(({ product, quantity }) => ({
       price_data: {
         currency: 'inr',
