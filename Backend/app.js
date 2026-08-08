@@ -5,10 +5,13 @@ const paymentController = require('./src/controllers/paymentController');
 const app = express();
 
 const UseRoutes = require('./src/Routers/userRouter');
-const allowedOrigins = [process.env.FRONTEND_URL, ...(process.env.CORS_ALLOWED_ORIGINS || '')]
-  .split(',')
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  ...(process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(',') : [])
+]
   .map((origin) => origin && origin.trim())
   .filter(Boolean);
+
 
 app.post('/Users/payments/webhook', express.raw({ type: 'application/json' }), paymentController.handleWebhook);
 app.use(express.json());
