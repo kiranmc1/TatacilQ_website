@@ -1,4 +1,4 @@
-const userrepo = require('../config/repositories/userRepository');
+const userrepo = require('../repositories/userRepository');
 
 const isFlagEnabled = (value) => {
     if (typeof value === 'boolean') return value;

@@ -1,5 +1,5 @@
 const { ObjectId } = require('mongodb');
-const { connectDb } = require('../../config/db');
+const { connectDb } = require('../config/db');
 
 const toUserPayload = (user) => {
     if (!user) return null;

@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { ObjectId } = require('mongodb');
-const { connectDb } = require('./src/config/db');
+const { connectDb } = require('../config/db');
 
 const envUsers = [
   {

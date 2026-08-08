@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const userrepo = require('../config/repositories/userRepository');
+const userrepo = require('../repositories/userRepository');
 const notification = require('../utils/notification');
 
 exports.login = async (email, password) => {
