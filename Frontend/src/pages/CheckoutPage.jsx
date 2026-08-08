@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import './CheckoutPage.css'
+import { apiUrl } from '../utils/api'
 
 function CheckoutPage() {
   const { productId } = useParams()

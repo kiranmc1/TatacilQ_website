@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
+import { apiUrl } from '../utils/api'
 
 function PaymentSuccess() {
   const [searchParams] = useSearchParams()
