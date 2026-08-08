@@ -174,9 +174,7 @@
     grid-template-columns: 1fr;
   }
 }
-    border-bottom: 1px solid #e9ecef;
-    border-radius: 8px 8px 0 0;
-  }
+   
 
   .product-submenu {
     min-width: auto;
@@ -186,4 +184,3 @@
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-}

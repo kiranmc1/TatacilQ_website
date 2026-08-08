@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import './CategoryDropdown.css'
+import { apiUrl } from '../utils/api'
 
 function CategoryDropdown() {
   const [categories, setCategories] = useState([])
