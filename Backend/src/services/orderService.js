@@ -1,4 +1,4 @@
-const orderRepo = require('../repositories/orderRepository');
+const orderRepo = require('../config/repositories/orderRepository');
 
 const createOrderNumber = () => {
     const timestamp = Date.now().toString();
