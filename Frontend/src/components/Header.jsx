@@ -110,6 +110,7 @@ function Header() {
         }
 
         const data = await response.json()
+        setUser((currentUser) => currentUser ? { ...currentUser, ...data.user, token: currentUser.token } : currentUser)
         setIsAdminUser(normalizeFlag(data?.user?.isAdmin))
         setIsVendorUser(normalizeFlag(data?.user?.isVendor))
       } catch (error) {
@@ -120,7 +121,7 @@ function Header() {
     }
 
     loadCurrentUser()
-  }, [user])
+  }, [user?.token])
 
   const isContinueEnabled = authMethod === 'mobile'
     ? /^\d{10}$/.test(authValue)
@@ -388,9 +389,9 @@ function Header() {
                         onClick={() => setProfileMenuOpen((open) => !open)}
                       >
                         <div className="profile-chip">
-                          <span>{user.name ? user.name[0] : user.email?.[0] || 'U'}</span>
+                          <span>{(user.name || user.username || user.email || user.phone || 'U')[0]}</span>
                           <div>
-                          <strong>{user.name || user.email || user.phone || 'My Profile'}</strong>
+                          <strong>{user.name || user.username || user.email || user.phone || 'My Profile'}</strong>
                           <small>My Profile</small>
                         </div>
                       </div>
@@ -413,9 +414,9 @@ function Header() {
             <div className="profile-menu">
               <div className="profile-menu-card">
                 <div className="profile-menu-header">
-                  <span>{user.name ? user.name[0] : user.email?.[0] || 'U'}</span>
+                  <span>{(user.name || user.username || user.email || user.phone || 'U')[0]}</span>
                   <div>
-                    <strong>{user.name || user.email || user.phone || 'User'}</strong>
+                    <strong>{user.name || user.username || user.email || user.phone || 'User'}</strong>
                     <p>Premium Member</p>
                   </div>
                 </div>
