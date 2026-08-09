@@ -434,5 +434,7 @@ exports.updateAddress = async (id, address) => {
         { $set: { address, updatedAt: new Date() } },
         { returnDocument: 'after' }
     );
-    return toUserPayload(result.value);
+    // MongoDB driver v6 returns the document directly by default; older
+    // configurations return it in `value`.
+    return toUserPayload(result?.value ?? result);
 };
