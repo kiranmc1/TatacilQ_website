@@ -392,7 +392,6 @@ function Header() {
                           <span>{(user.name || user.username || user.email || user.phone || 'U')[0]}</span>
                           <div>
                           <strong>{user.name || user.username || user.email || user.phone || 'My Profile'}</strong>
-                          <small>My Profile</small>
                         </div>
                       </div>
                     </button>
