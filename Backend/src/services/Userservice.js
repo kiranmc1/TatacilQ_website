@@ -126,6 +126,14 @@ exports.getCurrentUser = async (userId) => {
     return user;
 };
 
+exports.updateAddress = async (userId, address) => {
+    const user = await userrepo.updateAddress(userId, address);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    return user;
+};
+
 exports.getAllCategories = async () => {
     return await userrepo.getAllCategories();
 };

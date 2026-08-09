@@ -17,6 +17,7 @@ router.get('/Homeproducts', userController.getAllHomeProducts);
 router.get('/products', userController.getProducts);
 router.get('/products/:id', userController.getProductById);
 router.get('/me', auth, userController.getMe);
+router.put('/me/address', auth, userController.updateAddress);
 router.get('/:id/dashboard', auth, userController.getDashboard);
 
 router.post('/payments/create-checkout-session', auth, paymentController.createCheckoutSession);

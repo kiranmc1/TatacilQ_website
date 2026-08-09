@@ -300,7 +300,7 @@ function Header() {
   }
 
   const profileMenuItems = [
-    { label: 'My account', icon: '👤' },
+    { label: 'My account', icon: '👤', path: '/account' },
     { label: 'Order History', icon: '🛒' },
     { label: 'My Wishlist', icon: '💖' },
     { label: 'Alerts & Coupon', icon: '🔔' },
@@ -433,7 +433,7 @@ function Header() {
                     </button>
                   )}
                   {profileMenuItems.map((item) => (
-                    <button key={item.label} type="button" className="profile-menu-item">
+                    <button key={item.label} type="button" className="profile-menu-item" onClick={() => item.path && handlePortalAccess(item.path)}>
                       <span className="profile-menu-icon">{item.icon}</span>
                       <span>{item.label}</span>
                     </button>

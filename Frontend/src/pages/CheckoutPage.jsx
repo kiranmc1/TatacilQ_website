@@ -13,6 +13,7 @@ function CheckoutPage() {
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [orderId, setOrderId] = useState(null)
+  const [shippingAddress, setShippingAddress] = useState(null)
 
   useEffect(() => {
     const loadItems = async () => {
@@ -50,6 +51,22 @@ function CheckoutPage() {
     loadItems()
   }, [productId])
 
+  useEffect(() => {
+    const loadAddress = async () => {
+      const token = getAuthToken()
+      if (!token) return
+      try {
+        const response = await fetch(apiUrl('/Users/me'), { headers: { Authorization: `Bearer ${token}` } })
+        if (!response.ok) throw new Error('Unable to load delivery address')
+        const data = await response.json()
+        setShippingAddress(data.user?.address || null)
+      } catch (err) {
+        setError(err.message || 'Unable to load delivery address')
+      }
+    }
+    loadAddress()
+  }, [])
+
   const getAuthToken = () => {
     try {
       const storedUser = window.localStorage.getItem('cliqUser')
@@ -80,6 +97,11 @@ function CheckoutPage() {
     if (!token) {
       alert('Please login first to complete payment.')
       navigate('/')
+      return
+    }
+
+    if (!shippingAddress?.line1 || !shippingAddress?.city || !shippingAddress?.state || !shippingAddress?.zipcode || !shippingAddress?.country) {
+      setError('Please save a delivery address in My Account before paying.')
       return
     }
 
@@ -122,13 +144,6 @@ function CheckoutPage() {
           price: item.price,
           total: (item.price || 0) * (item.quantity || 1),
         })),
-        shippingAddress: {
-          line1: '56 Connaught Place',
-          city: 'Delhi',
-          state: 'Delhi',
-          zipcode: '110001',
-          country: 'India',
-        },
         paymentMethod,
         paymentStatus: 'paid',
         shippingCharge,
@@ -248,9 +263,12 @@ function CheckoutPage() {
               <div className="section-header">
                 <h3>Delivery Address</h3>
               </div>
-              <p>56 Connaught Place</p>
-              <p>Delhi, Delhi 110001</p>
-              <p>India</p>
+              {shippingAddress ? <>
+                <p>{shippingAddress.line1}</p>
+                {shippingAddress.line2 && <p>{shippingAddress.line2}</p>}
+                <p>{shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipcode}</p>
+                <p>{shippingAddress.country}</p>
+              </> : <p>No delivery address saved. <button type="button" className="secondary-action-btn" onClick={() => navigate('/account')}>Add address</button></p>}
               <div className="shipping-badge">Cash on Delivery available</div>
               <div className="shipping-delivery-date">
                 <span className="delivery-icon">🚚</span>

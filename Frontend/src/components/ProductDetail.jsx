@@ -10,6 +10,7 @@ function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState('M')
   const [loading, setLoading] = useState(true)
   const [cartMessage, setCartMessage] = useState('')
+  const [shippingAddress, setShippingAddress] = useState(null)
 
   const handleAddToCart = () => {
     const cartItem = {
@@ -64,6 +65,23 @@ function ProductDetail() {
   useEffect(() => {
     setSelectedImageIndex(0)
   }, [productId])
+
+  useEffect(() => {
+    const loadAddress = async () => {
+      try {
+        const token = JSON.parse(window.localStorage.getItem('cliqUser') || '{}').token
+        if (!token) return
+        const response = await fetch(apiUrl('/Users/me'), { headers: { Authorization: `Bearer ${token}` } })
+        if (response.ok) {
+          const data = await response.json()
+          setShippingAddress(data.user?.address || null)
+        }
+      } catch {
+        setShippingAddress(null)
+      }
+    }
+    loadAddress()
+  }, [])
 
   if (loading) {
     return (
@@ -199,9 +217,9 @@ function ProductDetail() {
             <div className="product-detail-buy-row">
               <div>
                 <span className="buy-info-label">Ship To</span>
-                <span className="buy-info-value">110001, Delhi</span>
+                <span className="buy-info-value">{shippingAddress ? `${shippingAddress.zipcode}, ${shippingAddress.city}` : 'Add a delivery address'}</span>
               </div>
-              <button type="button" className="change-pincode-btn">Change Pincode</button>
+              <Link to="/account" className="change-pincode-btn">{shippingAddress ? 'Change Address' : 'Add Address'}</Link>
             </div>
             <div className="product-detail-buy-row">
               <span>Delivery by 11th Jul</span>

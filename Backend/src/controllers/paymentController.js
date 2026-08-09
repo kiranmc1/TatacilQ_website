@@ -13,6 +13,11 @@ exports.createCheckoutSession = async (req, res) => {
       return res.status(401).json({ message: 'Authentication required' });
     }
 
+    const user = await userService.getCurrentUser(userId);
+    if (!user.address?.line1 || !user.address?.city || !user.address?.state || !user.address?.zipcode || !user.address?.country) {
+      return res.status(400).json({ message: 'Save a delivery address in My Account before paying' });
+    }
+
     let cartItems = [];
     if (items && Array.isArray(items) && items.length) {
       for (const item of items) {
@@ -133,16 +138,16 @@ exports.handleWebhook = async (req, res) => {
         }
 
         if (orderItems.length) {
+          const user = await userService.getCurrentUser(userId);
+          const shippingAddress = user.address;
+          if (!shippingAddress?.line1 || !shippingAddress?.city || !shippingAddress?.state || !shippingAddress?.zipcode || !shippingAddress?.country) {
+            throw new Error('User has no saved delivery address');
+          }
+
           await orderService.createOrder({
             userId,
             items: orderItems,
-            shippingAddress: {
-              line1: '56 Connaught Place',
-              city: 'Delhi',
-              state: 'Delhi',
-              zipcode: '110001',
-              country: 'India',
-            },
+            shippingAddress,
             paymentMethod: 'Card',
             paymentStatus: 'paid',
             shippingCharge: 29,

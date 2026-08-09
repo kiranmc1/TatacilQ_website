@@ -1,16 +1,19 @@
 const orderService = require('../services/orderService');
+const userService = require('../services/Userservice');
 
 exports.createOrder = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { items, shippingAddress, paymentMethod, paymentStatus, shippingCharge, offerSummary } = req.body;
+        const { items, paymentMethod, paymentStatus, shippingCharge, offerSummary } = req.body;
 
         if (!Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ message: 'Order must contain at least one item' });
         }
 
-        if (!shippingAddress || !shippingAddress.line1 || !shippingAddress.city || !shippingAddress.zipcode) {
-            return res.status(400).json({ message: 'Valid shipping address is required' });
+        const user = await userService.getCurrentUser(userId);
+        const shippingAddress = user.address;
+        if (!shippingAddress?.line1 || !shippingAddress?.city || !shippingAddress?.state || !shippingAddress?.zipcode || !shippingAddress?.country) {
+            return res.status(400).json({ message: 'Save a delivery address in My Account before placing an order' });
         }
 
         if (!paymentMethod) {

@@ -425,3 +425,14 @@ exports.deleteBrand = async (brandId) => {
         throw new Error('Not Found');
     }
 };
+
+exports.updateAddress = async (id, address) => {
+    const db = await connectDb();
+    const query = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { id };
+    const result = await db.collection('Users').findOneAndUpdate(
+        query,
+        { $set: { address, updatedAt: new Date() } },
+        { returnDocument: 'after' }
+    );
+    return toUserPayload(result.value);
+};

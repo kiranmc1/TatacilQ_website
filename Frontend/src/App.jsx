@@ -14,6 +14,7 @@ import PaymentSuccess from './pages/PaymentSuccess'
 import OrderTrackerPage from './pages/OrderTrackerPage'
 import CartPage from './pages/CartPage'
 import Care from './pages/Care'
+import AccountPage from './pages/AccountPage'
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         <Route path="/admin/approvals" element={<AdminVendorApprovalPage />} />
         <Route path="/vendor" element={<VendorPage />} />
         <Route path="/care" element={<Care />} />
+        <Route path="/account" element={<AccountPage />} />
       </Routes>
     </div>
   )

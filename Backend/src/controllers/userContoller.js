@@ -372,3 +372,24 @@ exports.deleteBrand = async (req, res) => {
         res.status(err.message === 'Not Found' ? 404 : 400).json({ message: err.message || 'Unable to delete brand' });
     }
 };
+
+exports.updateAddress = async (req, res) => {
+    try {
+        const { line1, line2, city, state, zipcode, country } = req.body;
+        if (!line1?.trim() || !city?.trim() || !state?.trim() || !zipcode?.trim() || !country?.trim()) {
+            return res.status(400).json({ message: 'Line 1, city, state, postal code, and country are required' });
+        }
+
+        const user = await userService.updateAddress(req.user.id, {
+            line1: line1.trim(),
+            line2: line2?.trim() || '',
+            city: city.trim(),
+            state: state.trim(),
+            zipcode: zipcode.trim(),
+            country: country.trim()
+        });
+        res.json({ user });
+    } catch (err) {
+        res.status(400).json({ message: err.message || 'Unable to save address' });
+    }
+};
